@@ -1,0 +1,11 @@
+# config.yaml example file
+
+# URLs for additional datasets
+dataset_urls:
+  - "https://example.com/dataset1.csv"
+  - "https://example.com/dataset2.csv"
+
+# Directory paths
+data_dir: "data/processed"
+results_dir: "results"
+logs_dir: "logs"
