@@ -10,7 +10,7 @@ This directory contains scripts for loading datasets used in this project. All o
 - **Paper**: [Single-cell transcriptomics of 20 mouse organs creates a Tabula Muris](https://www.nature.com/articles/s41586-018-0590-4)
 - **Citation**: The Tabula Muris Consortium., Overall coordination., Logistical coordination. et al. Single-cell transcriptomics of 20 mouse organs creates a Tabula Muris. Nature 562, 367–372 (2018). https://doi.org/10.1038/s41586-018-0590-4
 - **Summary**: scRNAseq of 53,760 cells from 20 organs and 8 mices, male and female. We're interested in the heart tissue cells. The goal is to increase the diversity in data sources within each cell type with the idea that it will result in more robust deconvolution marker selection. 
-- **Data Description**: Currently, Tabula Muris droplet data accessed by TabulaMurisSenisData::TabulaMurisSenisDroplet(), but this project will eventually switch to accessing and processing the raw read files.
+- **Data Description**: Currently, Tabula Muris droplet data accessed by `TabulaMurisSenisData::TabulaMurisSenisDroplet`(), but this project will eventually switch to accessing and processing the raw read files.
 
 ### Dataset 2
 
