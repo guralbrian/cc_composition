@@ -1,6 +1,6 @@
 # Data Loading Scripts
 
-This directory contains scripts for loading datasets used in this project. All of the datasets described here are publically available scRNAseq from mouse hearts. 
+This directory contains scripts for loading datasets used in this project. All of the datasets described here are publically available scRNAseq from mouse hearts. Two versions of each script are present, one for workflows within RStudio processes, and another for Snakemake pipelines (denoted with the _snakemake suffix). 
 
 ## Datasets
 

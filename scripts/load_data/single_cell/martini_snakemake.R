@@ -10,7 +10,7 @@ lapply(libs, require, character.only = T)
 # Import data from Martini 2019 doi.org/10.1161/CIRCULATIONAHA.119.041694
 # https://www.ncbi.nlm.nih.gov/sra/SRX5063185[accn]
 geo <- "GSE122930"
-dir <- "./data/processed/single_cell/geo"
+dir <- "./jensen/data/processed/geo"
 filePaths = getGEOSuppFiles(geo, baseDir = dir)
 paths <- rownames(filePaths)
 
@@ -69,5 +69,10 @@ sn.martini$origin <- "martini"
 sn.martini$orig.ident <- paste0("martini_", sn.martini$martini.cond)
 sn.martini$PercentMito <- PercentageFeatureSet(sn.martini, pattern = "^mt-")
 
+
 # Save the Seurat object
-SaveH5Seurat(sn.martini, "data/processed/single_cell/martini")
+if (!is.null(opt$outpath)) {
+  SaveH5Seurat(sn.martini, opt$outpath)
+} else {
+  stop("No output path specified.")
+}

@@ -1,9 +1,18 @@
 # Load necessary libraries
 libs <- c("Seurat", "zellkonverter", "curl", "SeuratDisk",
-          "TabulaMurisSenisData", "tidyverse", "Matrix", "optparse", "DESeq2")
+          "TabulaMurisSenisData", "tidyverse", "Matrix", "optparse")
 
 lapply(libs, require, character.only = T)
 
+# Set up command-line options
+option_list <- list(
+  make_option(c("-o", "--outpath"), type="character", default=NULL,
+              help="Output path for the Seurat object", metavar="character")
+)
+
+# Parse command-line options
+parser <- OptionParser(option_list=option_list)
+opt <- parse_args(parser)
 
 # Tabula Muris ####
 # raw fasta data available at
@@ -33,5 +42,8 @@ sn_muris_seurat$orig.ident <- paste0("tm_", sn_muris_seurat$mouse.id)
 sn_muris_seurat <- subset(sn_muris_seurat, tissue_free_annotation == "Heart")
 
 # Save the Seurat object
-SaveH5Seurat(sn_muris_seurat, "data/processed/single_cell/tabula_muris")
-
+if (!is.null(opt$outpath)) {
+  SaveH5Seurat(sn_muris_seurat., opt$outpath)
+} else {
+  stop("No output path specified.")
+}
