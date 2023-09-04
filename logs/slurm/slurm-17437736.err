@@ -1,0 +1,30 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	load_single_cell_data
+	1
+
+[Fri Sep  1 13:16:10 2023]
+rule load_single_cell_data:
+    output: data/processed/single_cell/wu_data.h5
+    jobid: 0
+    wildcards: dataset=wu
+
+Error: package or namespace load failed for ‘Seurat’ in loadNamespace(i, c(lib.loc, .libPaths()), versionCheck = vI[[i]]):
+ namespace ‘vctrs’ 0.5.0 is already loaded, but >= 0.5.2 is required
+Execution halted
+[Fri Sep  1 13:16:17 2023]
+Error in rule load_single_cell_data:
+    jobid: 0
+    output: data/processed/single_cell/wu_data.h5
+    shell:
+        
+        Rscript scripts/load_data/single_cell/wu.R --outpath data/processed/single_cell/wu_data.h5
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message

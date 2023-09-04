@@ -1,0 +1,53 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	load_single_cell_data
+	1
+
+[Fri Sep  1 13:16:10 2023]
+rule load_single_cell_data:
+    output: data/processed/single_cell/martini_data.h5
+    jobid: 0
+    wildcards: dataset=martini
+
+Loading required package: Seurat
+Error: package or namespace load failed for ‘Seurat’ in loadNamespace(i, c(lib.loc, .libPaths()), versionCheck = vI[[i]]):
+ namespace ‘vctrs’ 0.5.0 is already loaded, but >= 0.5.2 is required
+Loading required package: zellkonverter
+Loading required package: curl
+Using libcurl 7.61.1 with OpenSSL/1.1.1k
+Loading required package: SeuratDisk
+Error: package or namespace load failed for ‘SeuratDisk’ in loadNamespace(i, c(lib.loc, .libPaths()), versionCheck = vI[[i]]):
+ namespace ‘vctrs’ 0.5.0 is already loaded, but >= 0.5.2 is required
+Loading required package: TabulaMurisSenisData
+Loading required package: tidyverse
+Error: package or namespace load failed for ‘tidyverse’:
+ .onAttach failed in attachNamespace() for 'tidyverse', details:
+  call: NULL
+  error: package or namespace load failed for ‘tidyr’ in loadNamespace(i, c(lib.loc, .libPaths()), versionCheck = vI[[i]]):
+ namespace ‘vctrs’ 0.5.0 is already loaded, but >= 0.5.2 is required
+Loading required package: Matrix
+Loading required package: optparse
+Warning messages:
+1: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘zellkonverter’
+2: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘TabulaMurisSenisData’
+Error in getGEOSuppFiles(geo, baseDir = dir) : 
+  could not find function "getGEOSuppFiles"
+Execution halted
+[Fri Sep  1 13:16:15 2023]
+Error in rule load_single_cell_data:
+    jobid: 0
+    output: data/processed/single_cell/martini_data.h5
+    shell:
+        
+        Rscript scripts/load_data/single_cell/martini.R --outpath data/processed/single_cell/martini_data.h5
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message

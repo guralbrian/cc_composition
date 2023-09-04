@@ -1,0 +1,70 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cluster nodes: 3
+Job counts:
+	count	jobs
+	3	load_single_cell_data
+	3
+
+[Fri Sep  1 13:16:08 2023]
+rule load_single_cell_data:
+    output: data/processed/single_cell/martini_data.h5
+    jobid: 0
+    wildcards: dataset=martini
+
+Submitted job 0 with external jobid 'Submitted batch job 17437735'.
+
+[Fri Sep  1 13:16:08 2023]
+rule load_single_cell_data:
+    output: data/processed/single_cell/wu_data.h5
+    jobid: 1
+    wildcards: dataset=wu
+
+Submitted job 1 with external jobid 'Submitted batch job 17437736'.
+
+[Fri Sep  1 13:16:08 2023]
+rule load_single_cell_data:
+    output: data/processed/single_cell/tabula_muris_data.h5
+    jobid: 2
+    wildcards: dataset=tabula_muris
+
+Submitted job 2 with external jobid 'Submitted batch job 17437737'.
+[Fri Sep  1 13:16:18 2023]
+Error in rule load_single_cell_data:
+    jobid: 0
+    output: data/processed/single_cell/martini_data.h5
+    shell:
+        
+        Rscript scripts/load_data/single_cell/martini.R --outpath data/processed/single_cell/martini_data.h5
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+    cluster_jobid: Submitted batch job 17437735
+
+Error executing rule load_single_cell_data on cluster (jobid: 0, external: Submitted batch job 17437735, jobscript: /proj/raulab/users/brian/r_projects/cc_composition/.snakemake/tmp.l_eck1v8/snakejob.load_single_cell_data.0.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Sep  1 13:16:18 2023]
+Error in rule load_single_cell_data:
+    jobid: 1
+    output: data/processed/single_cell/wu_data.h5
+    shell:
+        
+        Rscript scripts/load_data/single_cell/wu.R --outpath data/processed/single_cell/wu_data.h5
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+    cluster_jobid: Submitted batch job 17437736
+
+Error executing rule load_single_cell_data on cluster (jobid: 1, external: Submitted batch job 17437736, jobscript: /proj/raulab/users/brian/r_projects/cc_composition/.snakemake/tmp.l_eck1v8/snakejob.load_single_cell_data.1.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Sep  1 13:16:18 2023]
+Error in rule load_single_cell_data:
+    jobid: 2
+    output: data/processed/single_cell/tabula_muris_data.h5
+    shell:
+        
+        Rscript scripts/load_data/single_cell/tabula_muris.R --outpath data/processed/single_cell/tabula_muris_data.h5
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+    cluster_jobid: Submitted batch job 17437737
+
+Error executing rule load_single_cell_data on cluster (jobid: 2, external: Submitted batch job 17437737, jobscript: /proj/raulab/users/brian/r_projects/cc_composition/.snakemake/tmp.l_eck1v8/snakejob.load_single_cell_data.2.sh). For error details see the cluster log and the log files of the involved rule(s).
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /proj/raulab/users/brian/r_projects/cc_composition/.snakemake/log/2023-09-01T131608.046646.snakemake.log

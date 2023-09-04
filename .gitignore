@@ -50,3 +50,7 @@ rsconnect/
 
 # Data folder
 data/
+
+# libraries folder 
+
+tools/r_libs/common/
