@@ -32,18 +32,18 @@ The primary aim of this project is to analyze the cellular composition of cardia
 
 This project is also meant to be a learning process for reproducible data analysis. Currently, all scripts are .R or .Rmd and meant to be manually opened and run in RStudio. Libraries and languages are not version controlled. Code is being pushed to a working branch and merged to main upon new, personally defined, functional versions. All code, data, and results are stored on UNC's HPC, Longleaf. 
 
-I intend to implement the following:
-    1. Snakemake automation for running analysis scripts
-        - Will need to adjust .R scripts to accept Snakemake options 
-        - .RMD files will need to be converted to .R files 
-    2. Choose and implement a package version control system. 
-        - Lightweight options include Conda and Renv
-        - More robust and intensive options include Docker and Singularity 
-            - Docker commands aren't natively supported by Longleaf
-            - Singlularity may be able to provide a workaround.
-    3. Interactive data visualization tools, like Shiny.
-    4. Automated storage of slurm.out files
-        - Also would like to merge .out files with R .log files for relevant scripts
+*Intend to implement the following:*
+- Snakemake automation for running analysis scripts
+    - Will need to adjust .R scripts to accept Snakemake options 
+    - .RMD files will need to be converted to .R files 
+- Choose and implement a package version control system. 
+    - Lightweight options include Conda and Renv
+    - More robust and intensive options include Docker and Singularity 
+        - Docker commands aren't natively supported by Longleaf
+        - Singlularity may be able to provide a workaround.
+- Interactive data visualization tools, like Shiny.
+    - Automated storage of slurm.out files
+    - Also would like to merge .out files with R .log files for relevant scripts
 
 
 ## Directory Structure
