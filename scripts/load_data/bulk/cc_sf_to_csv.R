@@ -16,5 +16,5 @@ counts_matrix <- all_data |>
   column_to_rownames(var = "Name") |> 
   as.data.frame()
 
-write.csv(counts_matrix, "data/raw/cc_counts/06222022/raw_matrix")
+write.csv(counts_matrix, "data/raw/cc_counts/06222022/raw_matrix.csv")
 

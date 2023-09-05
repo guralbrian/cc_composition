@@ -1,0 +1,221 @@
+"","Sub","CellType","Prop"
+"1","1","`endothelial cells`",0.0702878626295572
+"2","10","`endothelial cells`",0.108759669029648
+"3","11","`endothelial cells`",0.0794298063616916
+"4","12","`endothelial cells`",0.0661058773487493
+"5","13","`endothelial cells`",0.110357254073277
+"6","14","`endothelial cells`",0.129007473730184
+"7","15","`endothelial cells`",0.109979470663682
+"8","16","`endothelial cells`",0.0870766527729546
+"9","17","`endothelial cells`",0.0707284957485935
+"10","18","`endothelial cells`",0.109252043821848
+"11","19","`endothelial cells`",0.0728344933421796
+"12","2","`endothelial cells`",0.122824440625712
+"13","20","`endothelial cells`",0.129874397925686
+"14","21","`endothelial cells`",0.0643456013845761
+"15","22","`endothelial cells`",0.0670512911597973
+"16","23","`endothelial cells`",0.121087294389241
+"17","24","`endothelial cells`",0.0867348553368706
+"18","25","`endothelial cells`",0.102565950858237
+"19","26","`endothelial cells`",0.119554659115532
+"20","27","`endothelial cells`",0.0674372680717848
+"21","28","`endothelial cells`",0.104228332829852
+"22","29","`endothelial cells`",0.10019653479131
+"23","3","`endothelial cells`",0.069756765116024
+"24","30","`endothelial cells`",0.0989205432900054
+"25","31","`endothelial cells`",0.126375959166432
+"26","32","`endothelial cells`",0.104648936897827
+"27","33","`endothelial cells`",0.0528166858366419
+"28","34","`endothelial cells`",0.0714467322898122
+"29","35","`endothelial cells`",0.0837697275917752
+"30","36","`endothelial cells`",0.0697861464018256
+"31","37","`endothelial cells`",0.108458838127285
+"32","38","`endothelial cells`",0.0808062280352216
+"33","39","`endothelial cells`",0.12414505317273
+"34","4","`endothelial cells`",0.0894499130748591
+"35","40","`endothelial cells`",0.0833807590322022
+"36","41","`endothelial cells`",0.0793171367980129
+"37","42","`endothelial cells`",0.119073333519653
+"38","43","`endothelial cells`",0.118296501333133
+"39","44","`endothelial cells`",0.0796476064520701
+"40","5","`endothelial cells`",0.0817968999221105
+"41","6","`endothelial cells`",0.117264745015742
+"42","7","`endothelial cells`",0.069506998020841
+"43","8","`endothelial cells`",0.0933434004379415
+"44","9","`endothelial cells`",0.11394802771682
+"45","1","macrophages",0
+"46","10","macrophages",0
+"47","11","macrophages",0
+"48","12","macrophages",0
+"49","13","macrophages",0
+"50","14","macrophages",0
+"51","15","macrophages",0
+"52","16","macrophages",0
+"53","17","macrophages",0
+"54","18","macrophages",0
+"55","19","macrophages",0
+"56","2","macrophages",0
+"57","20","macrophages",0
+"58","21","macrophages",0
+"59","22","macrophages",0
+"60","23","macrophages",0
+"61","24","macrophages",0
+"62","25","macrophages",0
+"63","26","macrophages",0
+"64","27","macrophages",0
+"65","28","macrophages",0
+"66","29","macrophages",0
+"67","3","macrophages",0
+"68","30","macrophages",0
+"69","31","macrophages",0
+"70","32","macrophages",0
+"71","33","macrophages",0
+"72","34","macrophages",0
+"73","35","macrophages",0
+"74","36","macrophages",0
+"75","37","macrophages",0
+"76","38","macrophages",0
+"77","39","macrophages",0
+"78","4","macrophages",0
+"79","40","macrophages",0
+"80","41","macrophages",0
+"81","42","macrophages",0
+"82","43","macrophages",0
+"83","44","macrophages",0
+"84","5","macrophages",0
+"85","6","macrophages",0
+"86","7","macrophages",0
+"87","8","macrophages",0
+"88","9","macrophages",0
+"89","1","fibroblasts",0.0655289312230766
+"90","10","fibroblasts",0.0558561835208452
+"91","11","fibroblasts",0.091385044963786
+"92","12","fibroblasts",0.0685104318682051
+"93","13","fibroblasts",0.0926332139400958
+"94","14","fibroblasts",0.0653758400475406
+"95","15","fibroblasts",0.102417574916586
+"96","16","fibroblasts",0.0661299961599807
+"97","17","fibroblasts",0.0788860370567559
+"98","18","fibroblasts",0.0767351500528043
+"99","19","fibroblasts",0.0670879286881866
+"100","2","fibroblasts",0.120963510621511
+"101","20","fibroblasts",0.0951049286266031
+"102","21","fibroblasts",0.0743070298894987
+"103","22","fibroblasts",0.0560171059669441
+"104","23","fibroblasts",0.100479861146613
+"105","24","fibroblasts",0.0415588409702401
+"106","25","fibroblasts",0.092582416794538
+"107","26","fibroblasts",0.0842276013502316
+"108","27","fibroblasts",0.0688213767836601
+"109","28","fibroblasts",0.0510215597575306
+"110","29","fibroblasts",0.0865619432344829
+"111","3","fibroblasts",0.0609401208705338
+"112","30","fibroblasts",0.0626920908268953
+"113","31","fibroblasts",0.101727891999091
+"114","32","fibroblasts",0.068786508109984
+"115","33","fibroblasts",0.12604965728391
+"116","34","fibroblasts",0.0744628052308408
+"117","35","fibroblasts",0.0689386927450956
+"118","36","fibroblasts",0.0919643496154533
+"119","37","fibroblasts",0.067693355235464
+"120","38","fibroblasts",0.0956803153918559
+"121","39","fibroblasts",0.108162676229241
+"122","4","fibroblasts",0.217142795747545
+"123","40","fibroblasts",0.0950343137131634
+"124","41","fibroblasts",0.0621749566292952
+"125","42","fibroblasts",0.107728467159728
+"126","43","fibroblasts",0.0756253528710931
+"127","44","fibroblasts",0.079693009508109
+"128","5","fibroblasts",0.0535353018199109
+"129","6","fibroblasts",0.137198722604759
+"130","7","fibroblasts",0.0668102042820152
+"131","8","fibroblasts",0.0723119551760395
+"132","9","fibroblasts",0.0319785447655247
+"133","1","cardiomyocytes",0.864183206147366
+"134","10","cardiomyocytes",0.835384147449507
+"135","11","cardiomyocytes",0.829185148674522
+"136","12","cardiomyocytes",0.865383690783046
+"137","13","cardiomyocytes",0.797009531986627
+"138","14","cardiomyocytes",0.805616686222276
+"139","15","cardiomyocytes",0.787602954419732
+"140","16","cardiomyocytes",0.846793351067065
+"141","17","cardiomyocytes",0.850385467194651
+"142","18","cardiomyocytes",0.814012806125347
+"143","19","cardiomyocytes",0.860077577969634
+"144","2","cardiomyocytes",0.756212048752777
+"145","20","cardiomyocytes",0.775020673447711
+"146","21","cardiomyocytes",0.861347368725925
+"147","22","cardiomyocytes",0.876931602873259
+"148","23","cardiomyocytes",0.778432844464145
+"149","24","cardiomyocytes",0.871706303692889
+"150","25","cardiomyocytes",0.804851632347225
+"151","26","cardiomyocytes",0.796217739534237
+"152","27","cardiomyocytes",0.863741355144555
+"153","28","cardiomyocytes",0.844750107412618
+"154","29","cardiomyocytes",0.813241521974208
+"155","3","cardiomyocytes",0.869303114013442
+"156","30","cardiomyocytes",0.838387365883099
+"157","31","cardiomyocytes",0.771896148834477
+"158","32","cardiomyocytes",0.826564554992189
+"159","33","cardiomyocytes",0.821133656879448
+"160","34","cardiomyocytes",0.854090462479347
+"161","35","cardiomyocytes",0.847291579663129
+"162","36","cardiomyocytes",0.838249503982721
+"163","37","cardiomyocytes",0.823847806637251
+"164","38","cardiomyocytes",0.823513456572922
+"165","39","cardiomyocytes",0.767692270598029
+"166","4","cardiomyocytes",0.693407291177596
+"167","40","cardiomyocytes",0.821584927254634
+"168","41","cardiomyocytes",0.858507906572692
+"169","42","cardiomyocytes",0.773198199320619
+"170","43","cardiomyocytes",0.806078145795774
+"171","44","cardiomyocytes",0.840659384039821
+"172","5","cardiomyocytes",0.864667798257979
+"173","6","cardiomyocytes",0.745536532379499
+"174","7","cardiomyocytes",0.863682797697144
+"175","8","cardiomyocytes",0.834344644386019
+"176","9","cardiomyocytes",0.854073427517655
+"177","1","`B cells`",0
+"178","10","`B cells`",0
+"179","11","`B cells`",0
+"180","12","`B cells`",0
+"181","13","`B cells`",0
+"182","14","`B cells`",0
+"183","15","`B cells`",0
+"184","16","`B cells`",0
+"185","17","`B cells`",0
+"186","18","`B cells`",0
+"187","19","`B cells`",0
+"188","2","`B cells`",0
+"189","20","`B cells`",0
+"190","21","`B cells`",0
+"191","22","`B cells`",0
+"192","23","`B cells`",0
+"193","24","`B cells`",0
+"194","25","`B cells`",0
+"195","26","`B cells`",0
+"196","27","`B cells`",0
+"197","28","`B cells`",0
+"198","29","`B cells`",0
+"199","3","`B cells`",0
+"200","30","`B cells`",0
+"201","31","`B cells`",0
+"202","32","`B cells`",0
+"203","33","`B cells`",0
+"204","34","`B cells`",0
+"205","35","`B cells`",0
+"206","36","`B cells`",0
+"207","37","`B cells`",0
+"208","38","`B cells`",0
+"209","39","`B cells`",0
+"210","4","`B cells`",0
+"211","40","`B cells`",0
+"212","41","`B cells`",0
+"213","42","`B cells`",0
+"214","43","`B cells`",0
+"215","44","`B cells`",0
+"216","5","`B cells`",0
+"217","6","`B cells`",0
+"218","7","`B cells`",0
+"219","8","`B cells`",0
+"220","9","`B cells`",0

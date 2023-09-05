@@ -19,7 +19,7 @@ lapply(libs, .installPackages)
 
 # Install packages that use BiocManager
 
-libs <- c('zellkonverter', 'TabulaMurisSenisData')
+libs <- c('zellkonverter', 'TabulaMurisSenisData', 'DESeq2')
 
 library("BiocManager", lib.loc = "tools/r_libs/common")
 

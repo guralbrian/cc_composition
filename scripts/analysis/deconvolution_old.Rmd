@@ -77,38 +77,14 @@ gc()
 
 
 
-```{r deconvolute music , echo=FALSE, warning=FALSE, include=T}
-# Prep bulk matrix as ExpressionSet
-
-
-```
 ```{r music}
 
-all.markers$gene %in% rownames(bulk.es.exp)
-
-bulk.es.exp <- bulk |> 
-  as.matrix() %>%
+bulk.es.exp <- bulk[all.markers$gene,] |> 
+  sapply(as.integer) %>%
   ExpressionSet(assayData = .) |> 
   exprs()
+row.names(bulk.es.exp) <- all.markers$gene
 
-
-
-bulk.es.short <- bulk.es.exp[all.markers$gene,] |>
-                 as.data.frame() |>
-                 sapply(as.integer)
-  
-
-  decon <- music_prop(bulk.mtx = bulk.es.short, sc.sce = sn.sce, markers = all.markers$gene,
-                      clusters = "ident", samples = "orig.ident")
-  if(for.aitchison == T){
-    return(decon)
-  }
-  # Turn MuSiC output into graph-friendly dataframe
-  decon.melt = reshape2::melt(decon$Est.prop.weighted)
-  colnames(decon.melt) = c('Sub', 'CellType', 'Prop')
-  #decon.melt$combination <- paste(unique(seurat$origin), collapse = "_")
-  return(decon.melt)
-}
 
 # Run MuSiC with subset genes
 decon.melt <- EstimateCellTypeProportions(sn, bulk.es.exp, for.aitchison = FALSE, bulk.log2 = F,
@@ -116,18 +92,8 @@ decon.melt <- EstimateCellTypeProportions(sn, bulk.es.exp, for.aitchison = FALSE
  
 ```
 
-```{r prep phenos , fig.width = 14, fig.height= 8, echo=FALSE, message=FALSE, warning=FALSE}
-phenotypes_real <- jensen_bulk[1,] |> 
-  pivot_longer(cols = -c(1:5), 
-               names_to = "gene_treat", 
-               values_to = "id") |>
-  mutate(gene_treat = str_remove(gene_treat, "\\..*")) |>
-  select(gene_treat, id)
-
-```
-
                               
-```{r prep phenos , fig.width = 14, fig.height= 8, echo=FALSE, message=FALSE, warning=FALSE}
+```{r prep decon , fig.width = 14, fig.height= 8, echo=FALSE, message=FALSE, warning=FALSE}
 library(dplyr)
 library(stringr)
 
@@ -139,90 +105,10 @@ decon.melt <- decon.melt |>
     Prop = as.numeric(Prop)
   )
 
-# Bring in real phenotype data
-decon.melt <- merge(decon.melt, phenotypes_real, by.x = "Sub", by.y = "id", all.x = TRUE) |>
-  mutate(
-    gene_treat = factor(gene_treat, levels = unique(gene_treat))
-  )
-
-# Add genotype info
-decon.melt <- decon.melt |>
-  mutate(
-    genotype = factor(ifelse(!is.na(gene_treat), str_split(gene_treat, " ", simplify = TRUE)[,1], NA)),
-    treatment = factor(ifelse(!is.na(gene_treat), str_split(gene_treat, " ", simplify = TRUE)[,2], NA)),
-    type = factor(ifelse(str_detect(Sub, "RNA|Sham"), "fraction", "whole")),
-    origin = factor(case_when(
-      str_detect(Sub, "B6") ~ "Rau",
-      str_detect(Sub, "Sham") ~ "Froese",
-      TRUE ~ "Jensen"
-    )),
-    fraction_type = factor(case_when(
-      str_detect(Sub, "CM") ~ "Cardiomyocytes",
-      str_detect(Sub, "Fib|FB") ~ "Fibroblasts",
-      str_detect(Sub, "Endo|EC_") ~ "Endothelial Cells",
-      TRUE ~ NA_character_
-    ))
-  )
-
-
-
-
-
+write.csv(decon.melt, "results/composition_est/06222022/05052023_music.csv")
 ```
 
-```{r music plot sham, fig.width = 19, fig.height= 9, echo=FALSE, message=FALSE, warning=FALSE}
-
-# Reorder the factor levels of CellType so that they are ordered by sum of their values accross groups
-decon.melt$CellType <- reorder(decon.melt$CellType, -decon.melt$Prop, FUN = sum)
-
-# Setting the levels
-decon.melt$gene_treat <- factor(decon.melt$gene_treat, 
-                                        levels = c('WT sham', 'WT MI', 'KO sham', 'KO MI'))
-
-#! These colors are hard to read when printed, should be lighter
-#! Or the dots from geom_jitter need to be bigger/brighter
-
-my_palette <- c('#78c679', '#006d2c', '#d95f0e', '#993404')
-
-plot.jen.sample <- decon.melt |>
-  subset(type == "whole") |>
-  ggplot(aes(x = as.numeric(CellType), y = Prop, fill = gene_treat)) +
-  geom_bar(stat = "summary", 
-           position = position_dodge(0.9), 
-           fun = mean,
-           width = 0.9,
-           color = "black") +
-  theme(axis.text.x = element_text(color = "black", size = 25, angle =15),
-        axis.text.y = element_text(color = "black", size = 20),
-        axis.ticks = element_blank(),
-        legend.position = c(0.95, 0.95),
-        legend.justification = c("right", "top"),
-        legend.box.just = "right",
-        legend.margin = margin(6, 6, 6, 6),
-        strip.text = element_text(size = 20),
-        title = element_text(size = 30),
-        legend.text = element_text(size = 25),
-         panel.background = element_rect(fill='transparent'),
-         plot.background = element_rect(fill='transparent', color=NA),
-         panel.grid.major = element_blank(),
-         panel.grid.minor = element_blank(),
-         legend.background = element_rect(fill='transparent'),
-         legend.box.background = element_rect(fill='transparent')) +
-  labs(x = "Cell Type", 
-       y = "Proportion", 
-       fill = "Genotype-Treatment") +
-  scale_fill_manual(values = my_palette) +  # using custom palette
-  geom_jitter(inherit.aes = T, 
-              position = position_jitterdodge(0.01, 0, 0.9),
-              size = 2) +
-  scale_x_continuous(
-    breaks = 1:length(levels(decon.melt$CellType)),
-    label = levels(decon.melt$CellType)) +
-  geom_magnify(from = c(1.55,2.45,0,0.2), to = c(1.7,4,0.33,0.8), 
-                   shape = "rect", shadow = TRUE) 
-
-plot.jen.sample
-```
+### Everything below should be seperate scripts!
 
 ```{r bcvs.fractions, fig.width = 16, fig.height= 4, echo=FALSE, message=FALSE, warning=FALSE}
 

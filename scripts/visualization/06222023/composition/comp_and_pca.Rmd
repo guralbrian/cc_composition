@@ -1,0 +1,163 @@
+---
+title: "Cluster and visualize comp"
+author: "Brian Gural"
+date: "2023-09-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This doc will explore the Collaborative Cross RNAseq dataset from Christoph Rau. This data is a pilot consiting of 16 strains (48 samples) from his CC heart failure study. As of the writing of this document, I am blind to the genotype, sex, and treatment of these samples. The goal here is two fold: visualize estimates of the cellular composition underlying the bulk transcriptomics and predict treatment group by PCA clustering of composition or gene expression.
+
+
+```{r load data}
+
+# Load bulk data
+bulk <- read.csv("data/processed/bulk/cc/06222022/counts_summed_transcripts.csv", row.names = 1)
+
+colnames(bulk) <- extract_numeric(colnames(bulk))
+
+# Load composition estimates 
+# Produced by deconvolution_old.R 
+decon.melt <- read.csv("results/composition_est/06222022/05052023_music.csv", row.names = 1)
+
+decon.melt$CellType[grep("`endothelial cells`", decon.melt$CellType)]  <- "Endothelial Cells"
+decon.melt$CellType[grep("cardiomyocytes", decon.melt$CellType)]  <- "Cardiomyocytes"
+decon.melt$CellType[grep("fibroblasts", decon.melt$CellType)]  <- "Fibroblasts"
+
+
+```
+
+```{r reformat data}
+# Reorder the factor levels of CellType so that they are ordered by sum of their values accross groups
+decon.melt$CellType <- reorder(decon.melt$CellType, -decon.melt$Prop, FUN = sum)
+
+
+# Unmelt for clustering 
+
+decon.wide <- pivot_wider(decon.melt, names_from = "Sub", values_from = "Prop") |> 
+              column_to_rownames("CellType") %>%
+              mutate_all(as.numeric)
+```
+
+## Visualize compositions
+
+```{r comp plots, echo=FALSE, fig.width=16, fig.heigh = 5}
+
+# Plot each sample in a barchart stacked by cell type
+comp_sample <- decon.melt  |>
+    subset(Prop > 0.01) |> 
+    ggplot(aes(x=Sub, y=Prop, fill=CellType))  +
+    geom_bar(stat='identity',
+           position = "fill",
+           width = 0.8,
+           color = "black")+
+    scale_fill_brewer(name = "Cell Type",
+                    palette = "Dark2") +
+    theme_minimal() +
+    theme(axis.text.x = element_blank(),
+          strip.text = element_text(size = 20),
+          title = element_text(size = 20),
+          axis.text.y  = element_text(size = 15),
+          legend.text = element_text(size = 18),
+          axis.ticks.x = element_blank(),
+          legend.position = "none",
+          axis.title.y = element_blank(),
+          panel.grid = element_blank()) +
+    xlab("Samples")
+  
+# Plot distribution of each cell type among all samples
+comp_celltype <-  decon.melt  |>
+    subset(Prop > 0.01) |>
+    ggplot(aes(x=CellType, y=Prop))  +
+    geom_violin(aes(fill = CellType))+
+    scale_fill_brewer(name = "Cell Type",
+                    palette = "Dark2") +
+    geom_dotplot(binaxis='y', stackdir='centerwhole',
+                 binwidth = 0.01)+
+    ylab("Proportion") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(size = 18, angle = 20),
+          axis.text.y  = element_text(size = 15),
+          strip.text = element_text(size = 20),
+          title = element_text(size = 20),
+          legend.position = "none",
+          axis.ticks.x = element_blank(),
+          panel.grid = element_blank()) +
+    xlab("Cell Types")
+
+
+design <- "ABB"
+wrap_plots(A = comp_celltype, B = comp_sample, design = design)
+
+comp_celltype
+
+```
+
+```{r make pca}
+
+# Make PCA of comp
+
+pca.comp <- prcomp(decon.wide)$rotation |>
+            as.data.frame()
+
+# Make CLR of comp
+pca.clr  <- clr(t(decon.wide)) %>%
+            t() %>%
+            prcomp(.)
+pca.clr <- pca.clr$rotation |>
+            as.data.frame()
+
+# Make ILR of comp
+pca.ilr  <-ilr(t(decon.wide)) %>%
+           t() %>%
+           prcomp(.)
+pca.ilr <- pca.ilr$rotation |>
+            as.data.frame()
+
+# Make PCA of gene expression
+
+pca.gene <- prcomp(bulk)$rotation |>
+            as.data.frame()
+
+# Add in prop info for each
+
+pca.comp$Cardiomyocytes <- pca.ilr$Cardiomyocytes <- pca.clr$Cardiomyocytes <- pca.gene$Cardiomyocytes <- t(decon.wide["Cardiomyocytes",])
+pca.comp$Fibroblasts <-  pca.ilr$Fibroblasts <- pca.clr$Fibroblasts <- pca.gene$Fibroblasts <- t(decon.wide["Fibroblasts",])
+pca.comp$'Endothelial Cells' <-  pca.ilr$'Endothelial Cells'<- pca.clr$'Endothelial Cells' <- pca.gene$'Endothelial Cells' <- t(decon.wide["Endothelial Cells",])
+
+
+```
+
+```{r plot pca, fig.width=12, fig.height = 10}
+pca.gene.plot <- ggplot(pca.gene, aes(x = PC1, y = PC2, size = Cardiomyocytes, color = Fibroblasts)) +
+                  geom_point() +
+                  labs(title = "PCA of gene expression") +
+                  theme(legend.position = "none")
+
+pca.comp.plot <- ggplot(pca.comp, aes(x = PC1, y = PC2, size = Cardiomyocytes, color = Fibroblasts)) +
+                  geom_point() +
+                  labs(title = "PCA of compositions") 
+
+pca.ilr.plot <- ggplot(pca.ilr, aes(x = PC1, y = PC2, size = Cardiomyocytes, color = Fibroblasts)) +
+                  geom_point() +
+                  labs(title = "PCA of ILR transformed comp.") +
+                  theme(legend.position = "none")
+
+pca.clr.plot <- ggplot(pca.clr, aes(x = PC1, y = PC2, size = Cardiomyocytes, color = Fibroblasts)) +
+                  geom_point() +
+                  labs(title = "PCA of CLR transformed comp.")
+
+
+
+design.pca <- "AB
+               CD"
+wrap_plots(A = pca.gene.plot, B = pca.comp.plot, C = pca.ilr.plot, D = pca.clr.plot, design = design.pca)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
