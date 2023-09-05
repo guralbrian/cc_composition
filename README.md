@@ -5,14 +5,14 @@ Last updated to v0.2.0 on September 5th 2023
 
 ## Project Goals
 
-The primary aim of this project is to analyze the cellular composition of cardiac tissue using single-cell RNA sequencing data as a reference. Data is being generated and analyzed by the [Rau Lab at the University of North Carolina at Chapel Hill]{https://raulab.web.unc.edu/}. We are currently exploring pilot data, consisting of bulk RNAseq from the left ventricles of isoproterenol-treated mice from 16 strains of the Collaborative Cross. For reference-based deconvolution, we are using a combination of internal snRNAseq (LV, untreated, C57B/L6) and publically available scRNAseq (described in the relevant script sub-directory){https://github.com/guralbrian/cc_composition/tree/main/scripts/load_data/single_cell}. 
+The primary aim of this project is to analyze the cellular composition of cardiac tissue using single-cell RNA sequencing data as a reference. Data is being generated and analyzed by the [Rau Lab at the University of North Carolina at Chapel Hill](https://raulab.web.unc.edu/). We are currently exploring pilot data, consisting of bulk RNAseq from the left ventricles of isoproterenol-treated mice from 16 strains of the Collaborative Cross. For reference-based deconvolution, we are using a combination of internal snRNAseq (LV, untreated, C57B/L6) and publically available scRNAseq (described in the relevant script sub-directory)(https://github.com/guralbrian/cc_composition/tree/main/scripts/load_data/single_cell). 
 
 **This analysis pipeline currently is able to:**
 
-- [Download]{https://github.com/guralbrian/cc_composition/tree/main/scripts/load_data/} and [preprocess]{https://github.com/guralbrian/cc_composition/tree/main/scripts/quality_control} the raw data
-- [Merge sn/scRNAseq references and identify cell-type specific marker genes]{https://github.com/guralbrian/cc_composition/blob/main/scripts/analysis/merge_sn_old.Rmd}
-- [Perform reference-based deconvolution]{https://github.com/guralbrian/cc_composition/blob/main/scripts/analysis/deconvolution_old.Rmd} 
-- [Visualize compositions and perform/visualize dimensional reductions]{Phttps://github.com/guralbrian/cc_composition/blob/main/scripts/visualization/06222023/composition/comp_and_pca.Rmd}
+- [Download](https://github.com/guralbrian/cc_composition/tree/main/scripts/load_data/) and [preprocess](https://github.com/guralbrian/cc_composition/tree/main/scripts/quality_control) the raw data
+- [Merge sn/scRNAseq references and identify cell-type specific marker genes](https://github.com/guralbrian/cc_composition/blob/main/scripts/analysis/merge_sn_old.Rmd)
+- [Perform reference-based deconvolution](https://github.com/guralbrian/cc_composition/blob/main/scripts/analysis/deconvolution_old.Rmd) 
+- [Visualize compositions and perform/visualize dimensional reductions](https://github.com/guralbrian/cc_composition/blob/main/scripts/visualization/06222023/composition/comp_and_pca.Rmd)
 
 **Immediate next steps for actual analysis include:**
 
@@ -26,7 +26,7 @@ The primary aim of this project is to analyze the cellular composition of cardia
 **Further analysis include:**
 - QTL mapping for compositional changes during isoproterenol treatment
 - Composition-adjusted QTL mapping for heart failure phenotypes
-- Further ground-truths after benchwork is completed. Involves *in-vitro* mixtures of RNA isolated from purified cardiac cell types, sequenced by bulk RNAseq *a la* [Tumor Deconvolution DREAM Challenge]{https://www.synapse.org/#!Synapse:syn15589870/wiki/592683}
+- Further ground-truths after benchwork is completed. Involves *in-vitro* mixtures of RNA isolated from purified cardiac cell types, sequenced by bulk RNAseq *a la* [Tumor Deconvolution DREAM Challenge](https://www.synapse.org/#!Synapse:syn15589870/wiki/592683)
 
 ## Expected changes to analysis infrastructure
 
