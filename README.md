@@ -1,6 +1,6 @@
 # Cardiac Cell Composition Analysis
 
-Written by [Brian Gural]{https://www.linkedin.com/in/brian-gural-09bb60128/}
+Written by [Brian Gural](https://www.linkedin.com/in/brian-gural-09bb60128/) \
 Last updated to v0.2.0 on September 5th 2023
 
 ## Project Goals
@@ -32,7 +32,7 @@ The primary aim of this project is to analyze the cellular composition of cardia
 
 This project is also meant to be a learning process for reproducible data analysis. Currently, all scripts are .R or .Rmd and meant to be manually opened and run in RStudio. Libraries and languages are not version controlled. Code is being pushed to a working branch and merged to main upon new, personally defined, functional versions. All code, data, and results are stored on UNC's HPC, Longleaf. 
 
-*Intend to implement the following:*
+**Intend to implement the following:**
 - Snakemake automation for running analysis scripts
     - Will need to adjust .R scripts to accept Snakemake options 
     - .RMD files will need to be converted to .R files 
