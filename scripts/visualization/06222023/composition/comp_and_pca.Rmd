@@ -12,14 +12,22 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R Markdown
 
 This doc will explore the Collaborative Cross RNAseq dataset from Christoph Rau. This data is a pilot consiting of 16 strains (48 samples) from his CC heart failure study. As of the writing of this document, I am blind to the genotype, sex, and treatment of these samples. The goal here is two fold: visualize estimates of the cellular composition underlying the bulk transcriptomics and predict treatment group by PCA clustering of composition or gene expression.
-
+```{r load libs, message=FALSE, echo = T, warning=FALSE, results= 'hide', cache=FALSE}
+libs <- c("tidyverse", "ggmagnify", "compositions", "patchwork", "readxl") # list libraries here
+lapply(libs, require, character.only = T)
+rm(libs)
+```
 
 ```{r load data}
 
 # Load bulk data
 bulk <- read.csv("data/processed/bulk/cc/06222022/counts_summed_transcripts.csv", row.names = 1)
 
-colnames(bulk) <- extract_numeric(colnames(bulk))
+colnames(bulk) <- readr::parse_number(colnames(bulk))
+
+bulk <- bulk[,as.character(seq(1,44,1))]
+
+colnames(bulk) <- paste0("S", colnames(bulk))
 
 # Load composition estimates 
 # Produced by deconvolution_old.R 
@@ -29,24 +37,45 @@ decon.melt$CellType[grep("`endothelial cells`", decon.melt$CellType)]  <- "Endot
 decon.melt$CellType[grep("cardiomyocytes", decon.melt$CellType)]  <- "Cardiomyocytes"
 decon.melt$CellType[grep("fibroblasts", decon.melt$CellType)]  <- "Fibroblasts"
 
+# Load sample phenotypes
+
+phenos <- read.csv("data/raw/cc_counts/06222022/phenotypes/AdaptorList.csv")
+
+# Load sequencing core QC
+rna_qual <- readxl::read_excel("data/raw/cc_counts/06222022/phenotypes/QAQC-Summary_8870_RNA.xlsx")
+colnames(rna_qual)[1] <- "Mouse"
+
+
+phenos <- phenos |> 
+  left_join(rna_qual, by = join_by(Mouse))
 
 ```
 
 ```{r reformat data}
-# Reorder the factor levels of CellType so that they are ordered by sum of their values accross groups
-decon.melt$CellType <- reorder(decon.melt$CellType, -decon.melt$Prop, FUN = sum)
 
+decon.melt$Adaptor <- paste0("S", decon.melt$Sub)
 
 # Unmelt for clustering 
-
-decon.wide <- pivot_wider(decon.melt, names_from = "Sub", values_from = "Prop") |> 
+decon.wide <- decon.melt |> 
+              dplyr::select(-Sub) |> 
+              pivot_wider(names_from = "Adaptor", values_from = "Prop") |> 
               column_to_rownames("CellType") %>%
               mutate_all(as.numeric)
+
+# Add strain + treatment info
+decon.melt <- decon.melt |> 
+                left_join(phenos)
+
+# Reorder the factor levels of CellType so that they are ordered by sum of their values across groups
+decon.melt$CellType <- reorder(decon.melt$CellType, -decon.melt$Prop, FUN = sum)
+
 ```
 
 ## Visualize compositions
 
 ```{r comp plots, echo=FALSE, fig.width=16, fig.heigh = 5}
+
+my_palette <- c('#78c679', '#d95f0e')
 
 # Plot each sample in a barchart stacked by cell type
 comp_sample <- decon.melt  |>
@@ -59,8 +88,7 @@ comp_sample <- decon.melt  |>
     scale_fill_brewer(name = "Cell Type",
                     palette = "Dark2") +
     theme_minimal() +
-    theme(axis.text.x = element_blank(),
-          strip.text = element_text(size = 20),
+    theme(strip.text = element_text(size = 20),
           title = element_text(size = 20),
           axis.text.y  = element_text(size = 15),
           legend.text = element_text(size = 18),
@@ -70,31 +98,49 @@ comp_sample <- decon.melt  |>
           panel.grid = element_blank()) +
     xlab("Samples")
   
+
+
 # Plot distribution of each cell type among all samples
 comp_celltype <-  decon.melt  |>
     subset(Prop > 0.01) |>
-    ggplot(aes(x=CellType, y=Prop))  +
-    geom_violin(aes(fill = CellType))+
-    scale_fill_brewer(name = "Cell Type",
-                    palette = "Dark2") +
-    geom_dotplot(binaxis='y', stackdir='centerwhole',
-                 binwidth = 0.01)+
-    ylab("Proportion") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(size = 18, angle = 20),
-          axis.text.y  = element_text(size = 15),
-          strip.text = element_text(size = 20),
-          title = element_text(size = 20),
-          legend.position = "none",
-          axis.ticks.x = element_blank(),
-          panel.grid = element_blank()) +
-    xlab("Cell Types")
+    ggplot(aes(x = as.numeric(CellType), y = Prop, fill = Treatment)) +
+    geom_bar(stat = "summary", 
+           position = position_dodge(0.9), 
+           fun = mean,
+           width = 0.9,
+           color = "black") +
+    theme(axis.text.x = element_text(color = "black", size = 25, angle =15),
+        axis.text.y = element_text(color = "black", size = 20),
+        axis.ticks = element_blank(),
+        legend.position = c(0.8, 1),
+        legend.justification = c("right", "top"),
+        legend.box.just = "right",
+        legend.margin = margin(6, 6, 6, 6),
+        strip.text = element_text(size = 20),
+        title = element_text(size = 30),
+        legend.text = element_text(size = 25),
+         panel.background = element_rect(fill='transparent'),
+         plot.background = element_rect(fill='transparent', color=NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill='transparent'),
+         legend.box.background = element_rect(fill='transparent')) +
+    labs(x = "Cell Type", 
+       y = "Proportion", 
+       fill = "Treatment") +
+    scale_fill_manual(values = my_palette) +  # using custom palette
+    geom_jitter(inherit.aes = T, 
+              position = position_jitterdodge(0.01, 0, 0.9),
+              size = 2) +
+  scale_x_continuous(
+    breaks = 1:length(levels(decon.melt$CellType)),
+    label = levels(decon.melt$CellType)) +
+  geom_magnify(from = c(2.55,3.45,0.02,0.23), to = c(1.7,3.5,0.33,0.7), 
+                   shape = "rect", shadow = TRUE) 
 
-
-design <- "ABB"
+design <- "ABBB"
 wrap_plots(A = comp_celltype, B = comp_sample, design = design)
 
-comp_celltype
 
 ```
 
@@ -103,26 +149,39 @@ comp_celltype
 # Make PCA of comp
 
 pca.comp <- prcomp(decon.wide)$rotation |>
-            as.data.frame()
+            as.data.frame() |> 
+            rownames_to_column(var = "Adaptor") |> 
+            right_join(phenos, by = "Adaptor")
 
 # Make CLR of comp
-pca.clr  <- clr(t(decon.wide)) %>%
+pca.clr  <- compositions::clr(t(decon.wide)) %>%
             t() %>%
-            prcomp(.)
+            prcomp(.) |> 
+            summary()
 pca.clr <- pca.clr$rotation |>
-            as.data.frame()
+            as.data.frame() |> 
+            rownames_to_column(var = "Adaptor") |> 
+            right_join(phenos, by = "Adaptor")
+
 
 # Make ILR of comp
-pca.ilr  <-ilr(t(decon.wide)) %>%
+pca.ilr  <-compositions::ilr(t(decon.wide)) %>%
            t() %>%
            prcomp(.)
 pca.ilr <- pca.ilr$rotation |>
-            as.data.frame()
+            as.data.frame() |> 
+            rownames_to_column(var = "Adaptor") |> 
+            right_join(phenos, by = "Adaptor")
+
 
 # Make PCA of gene expression
 
 pca.gene <- prcomp(bulk)$rotation |>
-            as.data.frame()
+            as.data.frame() |> 
+            rownames_to_column(var = "Adaptor") |> 
+            right_join(phenos, by = "Adaptor")
+
+
 
 # Add in prop info for each
 
@@ -134,21 +193,25 @@ pca.comp$'Endothelial Cells' <-  pca.ilr$'Endothelial Cells'<- pca.clr$'Endothel
 ```
 
 ```{r plot pca, fig.width=12, fig.height = 10}
-pca.gene.plot <- ggplot(pca.gene, aes(x = PC1, y = PC2, size = Cardiomyocytes, color = Fibroblasts)) +
+
+
+
+
+pca.gene.plot <- ggplot(pca.gene, aes(x = PC1, y = PC2, color = RIN)) +
                   geom_point() +
                   labs(title = "PCA of gene expression") +
                   theme(legend.position = "none")
 
-pca.comp.plot <- ggplot(pca.comp, aes(x = PC1, y = PC2, size = Cardiomyocytes, color = Fibroblasts)) +
+pca.comp.plot <- ggplot(pca.comp, aes(x = PC1, y = PC2, color = RIN)) +
                   geom_point() +
                   labs(title = "PCA of compositions") 
 
-pca.ilr.plot <- ggplot(pca.ilr, aes(x = PC1, y = PC2, size = Cardiomyocytes, color = Fibroblasts)) +
+pca.ilr.plot <- ggplot(pca.ilr, aes(x = PC1, y = PC2, color = RIN)) +
                   geom_point() +
                   labs(title = "PCA of ILR transformed comp.") +
                   theme(legend.position = "none")
 
-pca.clr.plot <- ggplot(pca.clr, aes(x = PC1, y = PC2, size = Cardiomyocytes, color = Fibroblasts)) +
+pca.clr.plot <- ggplot(pca.clr, aes(x = PC1, y = PC2, color = RIN)) +
                   geom_point() +
                   labs(title = "PCA of CLR transformed comp.")
 
@@ -157,6 +220,56 @@ pca.clr.plot <- ggplot(pca.clr, aes(x = PC1, y = PC2, size = Cardiomyocytes, col
 design.pca <- "AB
                CD"
 wrap_plots(A = pca.gene.plot, B = pca.comp.plot, C = pca.ilr.plot, D = pca.clr.plot, design = design.pca)
+
+```
+
+```{r select pca.gene groups}
+pca.gene <- pca.gene |>
+    mutate(cluster = case_when(
+      PC2 < -0.1 ~ "A", 
+      TRUE ~ "B"
+    ))
+```
+
+```{r plot comp by pca cluster, fig.width=36, fig.height = 22}
+decon.test <- pca.gene |>
+  select(cluster, Adaptor) |>
+  left_join(decon.melt) |>
+    subset(Prop > 0.01) 
+
+decon.test |> 
+    ggplot(aes(x = as.numeric(CellType), y = Prop, fill = as.factor(Treatment))) +
+    geom_bar(stat = "summary", 
+           position = position_dodge(0.9), 
+           fun = mean,
+           width = 0.9,
+           color = "black") +
+    theme(axis.text.x = element_text(color = "black", size = 25, angle =15),
+        axis.text.y = element_text(color = "black", size = 20),
+        axis.ticks = element_blank(),
+        strip.text = element_text(size = 20),
+        title = element_text(size = 30),
+        legend.text = element_text(size = 25),
+         panel.background = element_rect(fill='transparent'),
+         plot.background = element_rect(fill='transparent', color=NA),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.background = element_rect(fill='transparent'),
+         legend.box.background = element_rect(fill='transparent')) +
+    labs(x = "Cell Type", 
+       y = "Proportion", 
+       fill = "Treatment") +
+    scale_fill_manual(values = my_palette) +  # using custom palette
+    geom_jitter(inherit.aes = T, 
+              position = position_jitterdodge(0.01, 0, 0.9),
+              size = 2) +
+  scale_x_continuous(
+    breaks = 1:length(levels(decon.test$CellType)),
+    label = levels(decon.test$CellType)) +
+  facet_wrap(~Sample.ID, 
+           scales = "free_x",
+           labeller =  label_wrap_gen(multi_line=FALSE))
+        
 
 ```
 
