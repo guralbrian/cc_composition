@@ -1,7 +1,7 @@
 ---
 title: "Merge scRNAseq datasets for deconvolution"
 author: "Brian Gural"
-date: "2023-08-16"
+date: "2023-09-07"
 output:
   html_document:
     code_folding: hide
@@ -23,58 +23,101 @@ libs <- c("Seurat", "ggplot2", "DESeq2", "patchwork","SeuratDisk", "MuSiC", "res
           "SummarizedExperiment", "Biobase", "ggmagnify", "stringr", "MuSiC",
           "ggforce", "DirichletReg", "readxl") # list libraries here
 lapply(libs, require, character.only = T)
-source("jensen/scripts/functions/decon_all.R")
+
 rm(libs)
 ```
 
 
 ```{r load data, message=FALSE, echo = T, warning = FALSE, cache = T, collapse = T}
 # load individual seurats
-dir <- "jensen/data/processed/single_cell/no_doublets/08162023/"
-files <- list.files(dir)
+dir <- "data/processed/single_cell/"
 
+# Select for input data
+origins <- c("wu", "martini", "rau", "tabula") |>
+           paste(collapse = "|") 
+
+files <-  filter(grepl(origins, list.files(dir)))
+
+# Load the selected seurat files
 sn <- lapply(files, function(x){LoadH5Seurat(paste0(dir, x))})
 
 names(sn) <- lapply(strsplit(files, ".h5seurat"), "[[", 1)
-
-# Load bulk data
-bulk <- read_csv("jensen/data/processed/jensen_rau_froese_cpm") |>
-  column_to_rownames(var = "...1")
-
-# Load and format bulk data
-jensen_bulk <- readxl::read_xlsx("jensen/data/raw/jensen_counts_correct.xlsx")[,-c(20,21)] |>
-  as.data.frame()
-colnames(jensen_bulk)[c(20,21)] <- c("WT MI", "KO MI")
-
 ```
-
-```{r rau processing, fig.width=5}
-# subset to the rau data
-sn.rau <- sn[str_detect(names(sn), "rau")]
-sn.rau <- merge(sn.rau[[1]], sn.rau[[2]])
-
-sn <- sn[!str_detect(names(sn), "rau")]
-names <- names(sn)
-sn <- c(sn, sn.rau)
-names(sn) <- c(names, "rau")
-
-rm(sn.rau)
-rm(names)
-gc()
-```
-
 
 ```{r non rau processing}
-sn$wu_2021$PercentMito <- PercentageFeatureSet(sn$wu_2021, pattern = "^mt-")
-sn$wu_2021$PercentRibo <- PercentageFeatureSet(sn$wu_2021, pattern = "^Rpl|^Rps")
+sn$wu$PercentMito <- PercentageFeatureSet(sn$wu_2021, pattern = "^mt-")
+sn$wu$PercentRibo <- PercentageFeatureSet(sn$wu_2021, pattern = "^Rpl|^Rps")
 ```
 
 
 ```{r raw processing}
+
+ClusterSeurat <- function(seurat.obj,
+                          subset = T,
+                          min.rna.ft = 200,
+                          max.rna.ft = 2500,
+                          min.rna.ct = 800,
+                          max.mt.pt  = 0.05,
+                          regress.by = "orig.ident",
+                          harmony    = T,
+                          res        = 0.2,
+                          nfeatures  = 2000,
+                          drop.levels = FALSE){
+  set.seed(100)
+  if(subset == T){
+    seurat.obj <- subset(seurat.obj, 
+                         subset = nFeature_RNA   > min.rna.ft     & 
+                                  nFeature_RNA   < max.rna.ft     &
+                                  nCount_RNA     > min.rna.ct     &
+                                  PercentMito   <= max.mt.pt)
+  }
+  seurat.obj <- seurat.obj |>
+    NormalizeData(verbose = F) |>
+    FindVariableFeatures(verbose = F, nfeatures = nfeatures) |>
+    ScaleData(verbose = F) |>
+    RunPCA(verbose = F) 
+  
+  if(harmony == T){
+    if(drop.levels ==T){
+    seurat.obj@meta.data[[regress.by]] <- droplevels(seurat.obj@meta.data[[regress.by]]) 
+    }
+    seurat.obj <- RunHarmony(seurat.obj, 
+                             group.by.vars = regress.by,
+                             verbose = F,
+                             project.dim = F)
+  }
+  
+  # find elbow
+    # Determine percent of variation associated with each PC
+    pct <- seurat.obj[["pca"]]@stdev / sum(seurat.obj[["pca"]]@stdev) * 100
+    # Calculate cumulative percents for each PC
+    cumu <- cumsum(pct)
+    # Determine which PC exhibits cumulative percent greater than 90% and % variation associated with the PC as less than 5
+    co1 <- which(cumu > 90 & pct < 5)[1]
+    # Determine the difference between variation of PC and subsequent PC
+    co2 <- sort(which((pct[1:length(pct) - 1] - pct[2:length(pct)]) > 0.1), decreasing = T)[1] + 1
+    pcs <- min(co1, co2)
+  
+  if(harmony == T){
+    seurat.obj <- seurat.obj |>
+      FindNeighbors(dims = 1:pcs, reduction = "harmony", verbose = F) |>
+      FindClusters(resolution = res, verbose = F) |>
+      RunUMAP(dims = 1:pcs, reduction = "harmony", verbose = F)
+    return(seurat.obj)
+  }else{
+    seurat.obj <- seurat.obj |>
+      FindNeighbors(dims = 1:pcs, reduction = "pca", verbose = F) |>
+      FindClusters(resolution = res, verbose = F) |>
+      RunUMAP(dims = 1:pcs, reduction = "pca", verbose = F)
+    return(seurat.obj)
+  }}
+
+
+
+
 sn <- lapply(sn, function(x){ClusterSeurat(x, max.rna.ft = 6000, subset = T, max.mt.pt = 5, harmony = F)})
 
 # Add cluster info
-
 .addClusters <- function(sn.func){
   sn.func$seurat.clusters <- Idents(sn.func)
   return(sn.func)
@@ -85,13 +128,70 @@ sn <- lapply(sn, function(x){.addClusters(x)})
 
 
 ```{r sn raw visuals, fig.height=22, fig.width=14}
-hist(sn$martini_2019$nCount_RNA, breaks = 100)
-hist(sn$martini_2019$nFeature_RNA, breaks = 100)
-# umap
-# PercentMito
-# nCount RNA
-# nFeature RNA
-# doublet score
+plotUMAP <- function(data,
+                     dim.ft = NULL,
+                     feat.ft = NULL,
+                     feat.labels =NULL,
+                     vln.ft = NULL,
+                     vln.groups = NULL,
+                     width = NULL,
+                     height = NULL,
+                     ncol = NULL,
+                     nrow = NULL,
+                     design = NULL,
+                     label.size = 4,
+                     font.size = NULL,
+                     name = NULL) {
+  dim.plots  <- vector("list", length(dim.ft))
+  feat.plots <- vector("list", length(feat.ft))
+  vln.plots <- vector("list", length(vln.ft)*length(vln.groups))
+  print(name)
+  for(i in seq_along(dim.plots)){
+    dim.plots[[i]]<- do_DimPlot(data, 
+                             reduction = 'umap', 
+                             group.by = dim.ft[[i]],
+                             label = T,
+                             repel = T,
+                             font.size = font.size,
+                             label.size = label.size) + 
+                          NoLegend() + 
+                          ggtitle(name) +
+                          theme(plot.title = element_text(size = font.size*2, hjust = 0.5))
+  } 
+  
+  for(i in seq_along(feat.plots)){
+    feat.plots[[i]] <-  SCpubr::do_FeaturePlot(data, 
+                                    reduction = "umap", 
+                                    features = feat.ft[[i]],
+                                    pt.size = 0.4, 
+                                    order = TRUE,
+                                    font.size = font.size,
+                                    label.size = label.size) + 
+                                    ggtitle(if(
+                                      !is.null(feat.labels[[i]])){
+                                        paste0("*",feat.ft[[i]],"*", ", ", feat.labels[[i]])
+                                           }else{
+                                        feat.ft[[i]]}) +
+                                    theme(plot.title = ggtext::element_markdown())
+  }
+  for(i in seq_along(vln.ft)){
+    for(j in seq_along(vln.groups)){
+    vln.plots[[i*j]] <-  SCpubr::do_ViolinPlot(data, 
+                                               features = vln.ft[[i]], 
+                                               group.by = vln.groups[[j]],
+                                               font.size = font.size) + 
+                                               ggtitle(paste0(vln.ft[[i]], " by ", vln.groups[[j]]))
+    }
+  }
+  return(patchwork::wrap_plots(c(dim.plots, feat.plots, vln.plots), 
+                               widths = width,
+                               heights = height,
+                               ncol = ncol,
+                               nrow = nrow,
+                               design = design))
+}
+
+
 .getPlots <- function(sn.func, names){
   dim.ft  <- c("seurat.clusters")
   feat.ft <- c("nCount_RNA","PercentMito", "DoubletScore")
@@ -121,9 +221,11 @@ names(raw.plots) <- names(sn)
 
 wrapped.plots <- lapply(names(raw.plots), function(x){.wrapPlots(x, raw.plots)})
 
-wrap_plots(wrapped.plots, ncol = length(raw.plots)) # +
-  #plot_annotation(tag_levels = list(c("Clusters", "Total Counts", "Percent\nMt RNA", "Doublet Score")), theme = theme(plot.tag = element_text(size = 26), plot.tag.position = "right"))
+png("results/single_cell/qc_plots/t_premerge_seurats.png", width=1200, height=1200)
 
+wrap_plots(wrapped.plots, ncol = length(raw.plots, clip = TRUE)) # +
+
+dev.off()
 
 ```
 
@@ -133,153 +235,16 @@ wrap_plots(wrapped.plots, ncol = length(raw.plots)) # +
 sn.merge <- merge(sn[[1]], sn[[2]]) |>
             merge(sn[[3]]) |>
             merge(sn[[4]])  |>
-            subset(isDoublet == "no")
+            merge(sn[[5]])  |>
+            subset(isDoublet != "yes")
 
-sn.merge <- ClusterSeurat(sn.merge, subset = F, regress.by = "origin", res = 0.05)
+sn.merge <- ClusterSeurat(sn.merge, subset = F, regress.by = "origin", res = 0.1)
+
+SaveH5Seurat(sn.merge, "data/processed/single_cell/merges/09072023_01res")
 ```
 
 ```{r merge visual}
+png("results/single_cell/qc_plots/t_merged.png", width=1200, height=1200)
 do_DimPlot(sn.merge, group.by ="origin")
+dev.off()
 ```
-
-```{r AUCell markers, echo=FALSE,warning=FALSE, include=TRUE, fig.height = 8, fig.width = 12}
-# Annotate to cell types
-markers.broad <- read.csv("jensen/data/processed/external/mclellan_2020/mclellan_cell_markers_broad.csv")
-```
-
-As we talked about last time, AUCell assigns an AUC score (think enrichment) for each cell based on expression and cell types with clear bimodal distributions are retained. The second part, retaining only cell-types with distinct groups, is a change from the last workflow that has been very helpful. Here’s how those AUC distributions look for the cell types we retained:
-
-```{r AUCell plot, echo=FALSE,warning=FALSE, include=TRUE, fig.height = 18, fig.width = 12}
-# Annotate to cell types
-n_markers <- 25
-n_cells <- 15000
- 
-  seurat <- sn.merge
-  cells <- sample(colnames(sn.merge), n_cells, replace = FALSE)
-  seurat <- seurat |>
-    subset(cells = cells)
-  markers.sub <- markers.broad %>%
-    group_by(cluster) %>%
-    top_n(n_markers, gene) |>
-    as.data.frame()
-  # Split 'markers' into separate data frames for each unique subcluster
-  subclusters <- split(markers.sub, markers.sub$cluster)
-  # Extract the gene names from each subcluster data frame
-  subcluster_genes <- lapply(subclusters, function(x) x$gene)
-  # Create a list with named elements corresponding to each subcluster
-  geneSets <- setNames(subcluster_genes, names(subclusters))
-  # make expression matrix of single cell
-  my.expr <-  seurat@assays$RNA@counts
-  # Find  AUC for each cell by each type
-  cells_AUC <- AUCell_run(my.expr, geneSets)
-  
-  cells_assignment <- AUCell_exploreThresholds(cells_AUC, plotHist=F, assign=TRUE)
-  
-  comments <- lapply(names(cells_assignment), function(cell_type){cells_assignment[[cell_type]]$aucThr$comment})
-  good_cells <- names(cells_assignment) #[comments == ""]
-  # get the thresholds and report when/how they're passdd
-  selectedThresholds <- getThresholdSelected(cells_assignment)
-  
-  auc.val <- cells_AUC@assays@data@listData$AUC |>
-    t()|>
-    as.data.frame() 
-  auc.val <- auc.val[,good_cells]
-  auc.val$seurat <- seurat$seurat_clusters[rownames(auc.val)]
-
-```
-
-```{r plot heatmap, fig.height = 20}
-# plot 
-plotAUC <- function(cell_type, auc.df, thresholds){
-threshold <- thresholds[[cell_type]]
-# Create the histogam
-ggplot(auc.df, aes(x = !!sym(cell_type))) +
-  geom_histogram(aes(fill = !!sym(cell_type) > threshold), binwidth = 0.01, stat = "bin") +
-  scale_fill_manual(values = c("TRUE" = "#D95F02", "FALSE" = "#1B9E77"), guide = FALSE) +
-  geom_vline(aes(xintercept = threshold), linetype="dashed", color = "black") +
-  theme_minimal() +
-  theme(title = element_text(size = 18),
-        axis.text = element_text(size = 14)) +
-  labs(x = "Value", y = "Count", title = cell_type, subtitle = paste0("Threshold: ", round(threshold, 3))) 
-}
-
-
-plots.auc <- lapply(good_cells, function(x){plotAUC(cell_type = x, auc.df = auc.val, thresholds = selectedThresholds)})
- 
-wrap_plots(plots.auc, ncol = 2)
-```
-
-```{r AUCell heatmap, echo=FALSE,warning=FALSE, include=TRUE, fig.height = 8, fig.width = 12}
-# Make correlation matrix for Seurat clusters and cell correlations to cell types
-
-corrs <- model.matrix(~0 + ., data = auc.val) |>
-  cor(use = "pairwise.complete.obs") |>
-  as.data.frame()
-# keep seurat cluster names just as a number
-corrs <- corrs[colnames(corrs)[!grepl("seurat", colnames(corrs))], colnames(corrs)[grepl("seurat", colnames(corrs))]] 
-colnames(corrs) <- lapply(strsplit(colnames(corrs), "seurat"), "[[", 2)
-
-# format for plotting
-corrs <- data.matrix(corrs, rownames.force = T)
-empty_columns <- colSums(is.na(corrs) | corrs == "") == nrow(corrs)
-standardized_residuals <- corrs[, !empty_columns]
-
-heatmap.2(standardized_residuals, 
-          trace = "none", 
-          col = viridis(8),
-          main = "Correlation coeffiecients between cell-types and clusters",
-          xlab = "Seurat Clusters",
-          ylab = "Cell Types",
-          margins = c(8, 12),
-          key.title = "Correlations",
-          srtCol = 0,
-          cexRow = 1.2)
-
-Idents(sn.merge) <- sn.merge$seurat_clusters
-
-sn.merge <- AssignAndFilterClusters(sn.merge, res.thresh = 0.25, ratio.thresh = 1, min.cell = 200)
-
-```
-
-
-```{r plot cell types, fig.height = 20, fig.width = 18}
-
-plots <- c()
-# seurat after 1_1_jensen_doublets.R and 1_2_jensen_merge.R
-plots[["dim.clust"]] <- do_DimPlot(sn.merge, label = T, repel = T) + NoLegend()
-plots[["dim.origin"]] <- do_DimPlot(sn.merge, group.by = "origin", label = T, repel = T) + NoLegend()
-
-# Convert your table to a data frame and reset row names
-df <- as.data.frame(table(sn.merge$origin, Idents(sn.merge)))
-colnames(df) <- c("origin", "cluster", "count")
-
-# Convert data frame from wide format to long format
-
-# Convert cluster to factor for ordered x-axis
-df$cluster <- factor(df$cluster, levels = unique(df$cluster))
-
-# Create the bar plot
-plots[["bar.clust.orig"]] <- ggplot(df, aes(x = cluster, y = count, fill = origin)) +
-  geom_bar(stat = "identity") +
-  theme_minimal() +
-  labs(x = "Cluster", y = "Count", fill = "Origin", 
-       title = "Count of Origins by Cluster") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-plots[["bar.umi"]] <- VlnPlot(sn.merge, group.by = "origin", features = "nCount_RNA", log = T) 
-
-plots[["feat.count"]] <- do_FeaturePlot(sn.merge, features = "nCount_RNA") 
-plots[["feat.features"]] <- do_FeaturePlot(sn.merge, features = "nFeature_RNA") 
-plots[["feat.mito"]] <- do_FeaturePlot(sn.merge, features = "PercentMito") 
-
-
-wrap_plots(plots, ncol = 2)
-
-#SaveH5Seurat(sn.merge, "jensen/data/processed/single_cell/merged_datasets/08162023")
-
-```
-
-
-
-
-
