@@ -1,0 +1,239 @@
+---
+title: "Rau-only deconvolution of CC pilot"
+author: "Brian Gural"
+date: "2023-09-13"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 10, message = F, warning = F, error = T)
+```
+
+
+
+```{r load libs}
+libs <- c("tidyverse", "Seurat", "SeuratDisk", "SCpubr", "Biobase",  
+          "reshape2", "ggmagnify", "compositions", "patchwork") # list libraries here
+lapply(libs, require, character.only = T)
+rm(libs)
+```
+
+```{r load data}
+# Load bulk data
+bulk <- read.csv("data/processed/bulk/cc/06222022/counts_summed_transcripts.csv", row.names = 1)
+
+colnames(bulk) <- readr::parse_number(colnames(bulk))
+
+bulk <- bulk[,as.character(seq(1,44,1))]
+
+colnames(bulk) <- paste0("S", colnames(bulk))
+
+# Load composition estimates 
+# Produced by rau_celltyping.Rmd
+decon.melt <- read.csv("results/composition_est/06222022/rau_patterson/09132023.csv")
+
+# Load sample phenotypes
+phenos <- read.csv("data/raw/cc_counts/06222022/phenotypes/AdaptorList.csv")
+colnames(phenos)[2] <- "Sub"
+
+fractions.pheno <- read.csv("data/processed/bulk/cc/fractions/jensen_rau_froese_pheno", row.names = 1)
+
+colnames(fractions.pheno)[1] <- "Sub"
+```
+
+```{r reformat data}
+# Divide fraction and whole data
+decon.frac <- decon.melt|> 
+              subset(Sub %in% fractions.pheno$Sub) |> 
+              merge(fractions.pheno)
+
+
+decon.melt <- decon.melt|> 
+              subset(Sub %in% phenos$Sub)
+# Unmelt for clustering 
+decon.wide <- decon.melt  |> 
+              pivot_wider(names_from = "Sub", values_from = "Prop") |> 
+              column_to_rownames("CellType") %>%
+              mutate_all(as.numeric)
+
+# Add strain + treatment info
+decon.melt <- decon.melt |> 
+              left_join(phenos)
+
+# Reorder the factor levels of CellType so that they are ordered by sum of their values across groups
+decon.melt$CellType <- reorder(decon.melt$CellType, -decon.melt$Prop, FUN = sum)
+
+```
+
+```{r plot fractions, fig.width=10, fig.height = 4}
+decon.frac |>
+  ggplot(aes(x=Sub, y=Prop, fill=CellType))  +
+   geom_bar(stat='identity',
+           position = "fill",
+           width = 0.8,
+           color = "black")+
+   scale_color_brewer(palette = "Dark2")  +
+   facet_wrap(~fraction,
+              scales = "free_x")+
+   ylab("Proportion") +
+   theme_minimal() +
+   theme(axis.text.x = element_blank(),
+        axis.text.y = element_text(color = "black", size = 12),
+        axis.ticks = element_blank(),
+        strip.text = element_text(size = 15),
+        title = element_text(size = 17),
+        legend.text = element_text(size = 15),
+        panel.background = element_blank(),
+        panel.grid = element_blank()) +
+   xlab("Sample replicates") 
+
+
+```
+
+```{r comp plots, echo=FALSE, fig.width=16, fig.heigh = 5}
+
+my_palette <- c('#78c679', '#d95f0e')
+
+# Plot each sample in a barchart stacked by cell type
+comp_sample <- decon.melt  |>
+    subset(Prop > 0.01) |> 
+    ggplot(aes(x=Sub, y=Prop, fill=CellType))  +
+    geom_bar(stat='identity',
+           position = "fill",
+           width = 0.8,
+           color = "black")+
+    scale_fill_brewer(name = "Cell Type",
+                      palette = "Dark2") +
+    theme_minimal() +
+    theme(strip.text = element_text(size = 20),
+          title = element_text(size = 20),
+          axis.text.y  = element_text(size = 15),
+          legend.text = element_text(size = 18),
+          axis.ticks.x = element_blank(),
+          axis.title.y = element_blank(),
+          panel.grid = element_blank()) +
+    xlab("Samples")
+  
+
+
+# Generate boxplot
+comp_celltype <- decon.melt  %>%
+    filter(Prop > 0.01) %>%
+    ggplot(aes(x = as.factor(CellType), y = Prop, fill = Treatment)) +
+    geom_boxplot(position = position_dodge(0.9), width = 0.9, color = "black") +
+    geom_jitter(inherit.aes = T, 
+                position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.9),
+                size = 2) +
+    theme(axis.text.x = element_text(color = "black", size = 15, angle =30),
+          axis.text.y = element_text(color = "black", size = 20),
+          axis.ticks = element_blank(),
+          legend.position = c(0.8, 1),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right",
+          legend.margin = margin(6, 6, 6, 6),
+          strip.text = element_text(size = 20),
+          title = element_text(size = 30),
+          legend.text = element_text(size = 25),
+          panel.background = element_rect(fill='transparent'),
+          plot.background = element_rect(fill='transparent', color=NA),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.background = element_rect(fill='transparent'),
+          legend.box.background = element_rect(fill='transparent')) +
+    labs(x = "Cell Type", 
+         y = "Proportion", 
+         fill = "Treatment") +
+    scale_fill_manual(values = my_palette) +
+    scale_x_discrete(
+      breaks = 1:length(levels(as.factor(decon.melt$CellType))),
+      label = levels(as.factor(decon.melt$CellType)))
+
+design <- "AABB"
+wrap_plots(A = comp_celltype, B = comp_sample, design = design)
+
+
+```
+
+```{r make pca}
+
+# Make PCA of comp
+
+pca.comp <- prcomp(decon.wide)$rotation |>
+            as.data.frame() |> 
+            rownames_to_column(var = "Sub") |> 
+            right_join(phenos, by = "Sub")
+
+# Make CLR of comp
+pca.clr  <- compositions::clr(t(decon.wide)) %>%
+            t() %>%
+            prcomp(.) |> 
+            summary()
+pca.clr <- pca.clr$rotation |>
+            as.data.frame() |> 
+            rownames_to_column(var = "Sub") |> 
+            right_join(phenos, by = "Sub")
+
+
+# Make ILR of comp
+pca.ilr  <-compositions::ilr(t(decon.wide)) %>%
+           t() %>%
+           prcomp(.)
+pca.ilr <- pca.ilr$rotation |>
+            as.data.frame() |> 
+            rownames_to_column(var = "Sub") |> 
+            right_join(phenos, by = "Sub")
+
+
+# Make PCA of gene expression
+
+pca.gene <- prcomp(bulk)$rotation |>
+            as.data.frame() |> 
+            rownames_to_column(var = "Sub") |> 
+            right_join(phenos, by = "Sub")
+
+
+
+# Add in prop info for each
+
+pca.comp$Cardiomyocytes <- pca.ilr$Cardiomyocytes <- pca.clr$Cardiomyocytes <- pca.gene$Cardiomyocytes <- t(decon.wide["Cardiomyocytes",])
+pca.comp$'Fibroblast, Mesen.' <-  pca.ilr$'Fibroblast, Mesen.' <- pca.clr$'Fibroblast, Mesen.' <- pca.gene$'Fibroblast, Mesen.' <- t(decon.wide["Fibroblast, Mesen.",])
+pca.comp$'Endothelial, Cor. Art.' <-  pca.ilr$'Endothelial, Cor. Art.'<- pca.clr$'Endothelial, Cor. Art.' <- pca.gene$'Endothelial, Cor. Art.' <- t(decon.wide["Endothelial, Cor. Art.",])
+
+
+```
+
+```{r plot pca, fig.width=12, fig.height = 10}
+
+
+
+
+pca.gene.plot <- ggplot(pca.gene, aes(x = PC1, y = PC2, color = Treatment)) +
+                  geom_point() +
+                  labs(title = "PCA of gene expression") +
+                  theme(legend.position = "none")
+
+pca.comp.plot <- ggplot(pca.comp, aes(x = PC1, y = PC2, color = Treatment)) +
+                  geom_point() +
+                  labs(title = "PCA of compositions") 
+
+pca.ilr.plot <- ggplot(pca.ilr, aes(x = PC1, y = PC2, color = Treatment)) +
+                  geom_point() +
+                  labs(title = "PCA of ILR transformed comp.") +
+                  theme(legend.position = "none")
+
+pca.clr.plot <- ggplot(pca.clr, aes(x = PC1, y = PC2, color = Treatment)) +
+                  geom_point() +
+                  labs(title = "PCA of CLR transformed comp.")
+
+
+
+design.pca <- "AB
+               CD"
+wrap_plots(A = pca.gene.plot, B = pca.comp.plot, C = pca.ilr.plot, D = pca.clr.plot, design = design.pca)
+
+```

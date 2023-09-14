@@ -1,0 +1,569 @@
+"Sub","CellType","Prop"
+"1","Endothelial, Cor. Art.",0.281574891524977
+"10","Endothelial, Cor. Art.",0.48803709027964
+"11","Endothelial, Cor. Art.",0.206807731330087
+"12","Endothelial, Cor. Art.",0.177442942827283
+"13","Endothelial, Cor. Art.",0.411359313704285
+"14","Endothelial, Cor. Art.",0.397051679815718
+"15","Endothelial, Cor. Art.",0.504755724803004
+"16","Endothelial, Cor. Art.",0.282761106360769
+"17","Endothelial, Cor. Art.",0.185184855424856
+"18","Endothelial, Cor. Art.",0.359421354471272
+"19","Endothelial, Cor. Art.",0.327393466624118
+"2","Endothelial, Cor. Art.",0.518227844321982
+"20","Endothelial, Cor. Art.",0.372534047015385
+"21","Endothelial, Cor. Art.",0.227406864801928
+"22","Endothelial, Cor. Art.",0.196791259750411
+"23","Endothelial, Cor. Art.",0.290445636457907
+"24","Endothelial, Cor. Art.",0.235507411354483
+"25","Endothelial, Cor. Art.",0.292202802410149
+"26","Endothelial, Cor. Art.",0.580861745095871
+"27","Endothelial, Cor. Art.",0.204617810900724
+"28","Endothelial, Cor. Art.",0.22547279950386
+"29","Endothelial, Cor. Art.",0.257751771607276
+"3","Endothelial, Cor. Art.",0.170444083671568
+"30","Endothelial, Cor. Art.",0.365657315922235
+"31","Endothelial, Cor. Art.",0.474447963645809
+"32","Endothelial, Cor. Art.",0.404897177873599
+"33","Endothelial, Cor. Art.",0.178263480746931
+"34","Endothelial, Cor. Art.",0.284143601657517
+"35","Endothelial, Cor. Art.",0.256853988555369
+"36","Endothelial, Cor. Art.",0.182973170747272
+"37","Endothelial, Cor. Art.",0.284756702307272
+"38","Endothelial, Cor. Art.",0.246173733326273
+"39","Endothelial, Cor. Art.",0.527459719055551
+"4","Endothelial, Cor. Art.",0.193188732174953
+"40","Endothelial, Cor. Art.",0.32981221060835
+"41","Endothelial, Cor. Art.",0.268972033936096
+"42","Endothelial, Cor. Art.",0.457369609102488
+"43","Endothelial, Cor. Art.",0.461752519415307
+"44","Endothelial, Cor. Art.",0.157257767697822
+"5","Endothelial, Cor. Art.",0.22021668322473
+"6","Endothelial, Cor. Art.",0.454669744057697
+"7","Endothelial, Cor. Art.",0.195566340645251
+"8","Endothelial, Cor. Art.",0.305587784286578
+"9","Endothelial, Cor. Art.",0.483413529892507
+"B6.F.CM.RNA.1","Endothelial, Cor. Art.",0.277927748220871
+"B6.F.CM.RNA.2","Endothelial, Cor. Art.",0.163125046815883
+"B6.F.CM.RNA.3","Endothelial, Cor. Art.",0.113015231275747
+"B6.F.CM.RNA.4","Endothelial, Cor. Art.",0.0557569301668114
+"B6.F.CM.RNA.5","Endothelial, Cor. Art.",0.0763211290042342
+"B6.F.Fib.RNA.1","Endothelial, Cor. Art.",0
+"B6.F.Fib.RNA.3","Endothelial, Cor. Art.",0
+"B6.F.Fib.RNA.4","Endothelial, Cor. Art.",0
+"B6.F.Fib.RNA.5","Endothelial, Cor. Art.",0
+"B6.M.CM.RNA.1","Endothelial, Cor. Art.",0.129001621727776
+"B6.M.CM.RNA.3","Endothelial, Cor. Art.",0.261091769225284
+"B6.M.CM.RNA.4","Endothelial, Cor. Art.",0.120165113775674
+"B6.M.CM.RNA.5","Endothelial, Cor. Art.",0.0697590798195854
+"B6.M.Fib.RNA.2","Endothelial, Cor. Art.",0
+"B6.M.Fib.RNA.3","Endothelial, Cor. Art.",0
+"B6.M.Endo.RNA.1","Endothelial, Cor. Art.",0.800773790499693
+"B6.M.Endo.RNA.2","Endothelial, Cor. Art.",0.868614047726788
+"B6.M.Endo.RNA.3","Endothelial, Cor. Art.",0.908424753375158
+"CM_Sham_19","Endothelial, Cor. Art.",0.00104433688995881
+"CM_Sham_20","Endothelial, Cor. Art.",0.00200381914266638
+"CM_Sham_21","Endothelial, Cor. Art.",0.0010889216772037
+"FB_Sham_10","Endothelial, Cor. Art.",0.0649219806464782
+"FB_Sham_11","Endothelial, Cor. Art.",0.0658218265398719
+"FB_Sham_12","Endothelial, Cor. Art.",0.0559254963570406
+"EC_Sham_1","Endothelial, Cor. Art.",0.820187682224558
+"EC_Sham_2","Endothelial, Cor. Art.",0.825489640873945
+"EC_Sham_3","Endothelial, Cor. Art.",0.848390732549894
+"1","Cardiomyocytes",0.479522103212666
+"10","Cardiomyocytes",0.361586627396434
+"11","Cardiomyocytes",0.441581168851045
+"12","Cardiomyocytes",0.622013732749424
+"13","Cardiomyocytes",0.340189942325735
+"14","Cardiomyocytes",0.295397787456189
+"15","Cardiomyocytes",0.234989370983704
+"16","Cardiomyocytes",0.484405660155139
+"17","Cardiomyocytes",0.48101505917676
+"18","Cardiomyocytes",0.408858574321084
+"19","Cardiomyocytes",0.499473620330413
+"2","Cardiomyocytes",0.263049178988626
+"20","Cardiomyocytes",0.240920579506577
+"21","Cardiomyocytes",0.525061818469914
+"22","Cardiomyocytes",0.589503180887519
+"23","Cardiomyocytes",0.342863114733459
+"24","Cardiomyocytes",0.557153688548258
+"25","Cardiomyocytes",0.390029984807084
+"26","Cardiomyocytes",0.242232158520446
+"27","Cardiomyocytes",0.478720124763186
+"28","Cardiomyocytes",0.417339860101488
+"29","Cardiomyocytes",0.467229480639715
+"3","Cardiomyocytes",0.621852196042539
+"30","Cardiomyocytes",0.435498093490036
+"31","Cardiomyocytes",0.275099636818719
+"32","Cardiomyocytes",0.399216468608966
+"33","Cardiomyocytes",0.417231893673339
+"34","Cardiomyocytes",0.492431174460339
+"35","Cardiomyocytes",0.509473090139933
+"36","Cardiomyocytes",0.493288493704084
+"37","Cardiomyocytes",0.407770267368761
+"38","Cardiomyocytes",0.448202319219011
+"39","Cardiomyocytes",0.237732657244177
+"4","Cardiomyocytes",0.257419633666033
+"40","Cardiomyocytes",0.39467984704924
+"41","Cardiomyocytes",0.497685287393085
+"42","Cardiomyocytes",0.240275476419775
+"43","Cardiomyocytes",0.295655963652525
+"44","Cardiomyocytes",0.463552241291402
+"5","Cardiomyocytes",0.576323764113002
+"6","Cardiomyocytes",0.261326478822246
+"7","Cardiomyocytes",0.499285633824575
+"8","Cardiomyocytes",0.483284413499574
+"9","Cardiomyocytes",0.239086938944314
+"B6.F.CM.RNA.1","Cardiomyocytes",0.662275106292968
+"B6.F.CM.RNA.2","Cardiomyocytes",0.774705628488289
+"B6.F.CM.RNA.3","Cardiomyocytes",0.788796498063321
+"B6.F.CM.RNA.4","Cardiomyocytes",0.74014639001899
+"B6.F.CM.RNA.5","Cardiomyocytes",0.871430188709742
+"B6.F.Fib.RNA.1","Cardiomyocytes",0.000124812292515063
+"B6.F.Fib.RNA.3","Cardiomyocytes",0.000127212052071819
+"B6.F.Fib.RNA.4","Cardiomyocytes",0.000153158952116443
+"B6.F.Fib.RNA.5","Cardiomyocytes",0.000222459701440343
+"B6.M.CM.RNA.1","Cardiomyocytes",0.690586829562403
+"B6.M.CM.RNA.3","Cardiomyocytes",0.694001286306386
+"B6.M.CM.RNA.4","Cardiomyocytes",0.707059160069144
+"B6.M.CM.RNA.5","Cardiomyocytes",0.875735148662984
+"B6.M.Fib.RNA.2","Cardiomyocytes",3.2916884380897e-05
+"B6.M.Fib.RNA.3","Cardiomyocytes",4.09261348852507e-05
+"B6.M.Endo.RNA.1","Cardiomyocytes",0.036518922689567
+"B6.M.Endo.RNA.2","Cardiomyocytes",0.0352354867896082
+"B6.M.Endo.RNA.3","Cardiomyocytes",0.0151613665676739
+"CM_Sham_19","Cardiomyocytes",0.995917155088515
+"CM_Sham_20","Cardiomyocytes",0.995652094678157
+"CM_Sham_21","Cardiomyocytes",0.995397228148503
+"FB_Sham_10","Cardiomyocytes",4.97827852922113e-05
+"FB_Sham_11","Cardiomyocytes",3.89031695205712e-05
+"FB_Sham_12","Cardiomyocytes",5.66547870960515e-05
+"EC_Sham_1","Cardiomyocytes",8.62241105739667e-06
+"EC_Sham_2","Cardiomyocytes",0
+"EC_Sham_3","Cardiomyocytes",0
+"1","Fibroblast, Mesen.",0.101161349743046
+"10","Fibroblast, Mesen.",0.0584852265451679
+"11","Fibroblast, Mesen.",0.127417379814165
+"12","Fibroblast, Mesen.",0.0894678272095534
+"13","Fibroblast, Mesen.",0.0990516717459482
+"14","Fibroblast, Mesen.",0.113092421691915
+"15","Fibroblast, Mesen.",0.0822709223186332
+"16","Fibroblast, Mesen.",0.101099704318231
+"17","Fibroblast, Mesen.",0.177519018983857
+"18","Fibroblast, Mesen.",0.0999035387901604
+"19","Fibroblast, Mesen.",0.08873516438663
+"2","Fibroblast, Mesen.",0.130513919045546
+"20","Fibroblast, Mesen.",0.187534125817175
+"21","Fibroblast, Mesen.",0.107464759966056
+"22","Fibroblast, Mesen.",0.0899500102784492
+"23","Fibroblast, Mesen.",0.181806083045934
+"24","Fibroblast, Mesen.",0.0732669577282032
+"25","Fibroblast, Mesen.",0.188012639791604
+"26","Fibroblast, Mesen.",0.0830540220668343
+"27","Fibroblast, Mesen.",0.138570771968779
+"28","Fibroblast, Mesen.",0.132466997762527
+"29","Fibroblast, Mesen.",0.12158448345619
+"3","Fibroblast, Mesen.",0.113423247764951
+"30","Fibroblast, Mesen.",0.086046239305762
+"31","Fibroblast, Mesen.",0.0612083475030031
+"32","Fibroblast, Mesen.",0.0930098972732553
+"33","Fibroblast, Mesen.",0.240314154441235
+"34","Fibroblast, Mesen.",0.0916262683591681
+"35","Fibroblast, Mesen.",0.0805461037175399
+"36","Fibroblast, Mesen.",0.20324010780755
+"37","Fibroblast, Mesen.",0.188472435360605
+"38","Fibroblast, Mesen.",0.147068939460661
+"39","Fibroblast, Mesen.",0.0969569565488159
+"4","Fibroblast, Mesen.",0.380858541371399
+"40","Fibroblast, Mesen.",0.132668933258747
+"41","Fibroblast, Mesen.",0.113104120950359
+"42","Fibroblast, Mesen.",0.129493664066477
+"43","Fibroblast, Mesen.",0.0788601894708135
+"44","Fibroblast, Mesen.",0.189288029954676
+"5","Fibroblast, Mesen.",0.0830931185842139
+"6","Fibroblast, Mesen.",0.0982703071543466
+"7","Fibroblast, Mesen.",0.130828564191691
+"8","Fibroblast, Mesen.",0.0662598962544173
+"9","Fibroblast, Mesen.",0.14830590779746
+"B6.F.CM.RNA.1","Fibroblast, Mesen.",0.03621397869264
+"B6.F.CM.RNA.2","Fibroblast, Mesen.",0.0331206615256008
+"B6.F.CM.RNA.3","Fibroblast, Mesen.",0.0247876891247565
+"B6.F.CM.RNA.4","Fibroblast, Mesen.",0.11591598899573
+"B6.F.CM.RNA.5","Fibroblast, Mesen.",0.0277908477068971
+"B6.F.Fib.RNA.1","Fibroblast, Mesen.",0.585547426538215
+"B6.F.Fib.RNA.3","Fibroblast, Mesen.",0.643468975215854
+"B6.F.Fib.RNA.4","Fibroblast, Mesen.",0.707248956670451
+"B6.F.Fib.RNA.5","Fibroblast, Mesen.",0.606062806823574
+"B6.M.CM.RNA.1","Fibroblast, Mesen.",0.0740698581853872
+"B6.M.CM.RNA.3","Fibroblast, Mesen.",0.0213911369719726
+"B6.M.CM.RNA.4","Fibroblast, Mesen.",0.0710481411624686
+"B6.M.CM.RNA.5","Fibroblast, Mesen.",0.0266785022046589
+"B6.M.Fib.RNA.2","Fibroblast, Mesen.",0.679805281018058
+"B6.M.Fib.RNA.3","Fibroblast, Mesen.",0.400035316512786
+"B6.M.Endo.RNA.1","Fibroblast, Mesen.",0
+"B6.M.Endo.RNA.2","Fibroblast, Mesen.",0
+"B6.M.Endo.RNA.3","Fibroblast, Mesen.",0
+"CM_Sham_19","Fibroblast, Mesen.",0
+"CM_Sham_20","Fibroblast, Mesen.",0.000105608324348562
+"CM_Sham_21","Fibroblast, Mesen.",0
+"FB_Sham_10","Fibroblast, Mesen.",0.644921062055469
+"FB_Sham_11","Fibroblast, Mesen.",0.601986740860698
+"FB_Sham_12","Fibroblast, Mesen.",0.582672674113703
+"EC_Sham_1","Fibroblast, Mesen.",0
+"EC_Sham_2","Fibroblast, Mesen.",0
+"EC_Sham_3","Fibroblast, Mesen.",0
+"1","Valve Cell, Mesen.",0.071852328307024
+"10","Valve Cell, Mesen.",0.0541906974181374
+"11","Valve Cell, Mesen.",0.142479148098284
+"12","Valve Cell, Mesen.",0.0707113762297672
+"13","Valve Cell, Mesen.",0.0643912202301796
+"14","Valve Cell, Mesen.",0.0724210244642425
+"15","Valve Cell, Mesen.",0.0820169133303313
+"16","Valve Cell, Mesen.",0.048631440122069
+"17","Valve Cell, Mesen.",0.120574773639292
+"18","Valve Cell, Mesen.",0.0733418436044801
+"19","Valve Cell, Mesen.",0.0542408110744131
+"2","Valve Cell, Mesen.",0.0304226625744236
+"20","Valve Cell, Mesen.",0.0508173314120436
+"21","Valve Cell, Mesen.",0.077273577085399
+"22","Valve Cell, Mesen.",0.0668095031315315
+"23","Valve Cell, Mesen.",0.0631256149250679
+"24","Valve Cell, Mesen.",0.108849199998664
+"25","Valve Cell, Mesen.",0.0727333233877889
+"26","Valve Cell, Mesen.",0.0351701590204032
+"27","Valve Cell, Mesen.",0.111307266697595
+"28","Valve Cell, Mesen.",0.120903343910295
+"29","Valve Cell, Mesen.",0.110310301724251
+"3","Valve Cell, Mesen.",0.0799007012573789
+"30","Valve Cell, Mesen.",0.0636371939909275
+"31","Valve Cell, Mesen.",0.015183510082683
+"32","Valve Cell, Mesen.",0.0746640162241314
+"33","Valve Cell, Mesen.",0.0635536285480597
+"34","Valve Cell, Mesen.",0.0651630795204194
+"35","Valve Cell, Mesen.",0.0883907129722934
+"36","Valve Cell, Mesen.",0.0559556534522523
+"37","Valve Cell, Mesen.",0.0961834784319146
+"38","Valve Cell, Mesen.",0.0994353116342714
+"39","Valve Cell, Mesen.",0.0702719695920277
+"4","Valve Cell, Mesen.",0.0458940087883755
+"40","Valve Cell, Mesen.",0.0730364259123105
+"41","Valve Cell, Mesen.",0.0672181419179746
+"42","Valve Cell, Mesen.",0.0070843637572207
+"43","Valve Cell, Mesen.",0.0541514994463719
+"44","Valve Cell, Mesen.",0.109678981734341
+"5","Valve Cell, Mesen.",0.0931415178722905
+"6","Valve Cell, Mesen.",0.0531732419760557
+"7","Valve Cell, Mesen.",0.124720685301379
+"8","Valve Cell, Mesen.",0.0719261618700328
+"9","Valve Cell, Mesen.",0.0639737007656696
+"B6.F.CM.RNA.1","Valve Cell, Mesen.",0.0114486739708536
+"B6.F.CM.RNA.2","Valve Cell, Mesen.",0.0126867452557373
+"B6.F.CM.RNA.3","Valve Cell, Mesen.",0.0427147070743122
+"B6.F.CM.RNA.4","Valve Cell, Mesen.",0.0422986033460525
+"B6.F.CM.RNA.5","Valve Cell, Mesen.",0.00908353851673386
+"B6.F.Fib.RNA.1","Valve Cell, Mesen.",0.161652600592714
+"B6.F.Fib.RNA.3","Valve Cell, Mesen.",0
+"B6.F.Fib.RNA.4","Valve Cell, Mesen.",0.0363206739267179
+"B6.F.Fib.RNA.5","Valve Cell, Mesen.",0
+"B6.M.CM.RNA.1","Valve Cell, Mesen.",0.0463489834261414
+"B6.M.CM.RNA.3","Valve Cell, Mesen.",0.00101416680494122
+"B6.M.CM.RNA.4","Valve Cell, Mesen.",0.0396447208887626
+"B6.M.CM.RNA.5","Valve Cell, Mesen.",0.00760432934642299
+"B6.M.Fib.RNA.2","Valve Cell, Mesen.",0.00260032722860242
+"B6.M.Fib.RNA.3","Valve Cell, Mesen.",0.204408007135142
+"B6.M.Endo.RNA.1","Valve Cell, Mesen.",0.0238860763346648
+"B6.M.Endo.RNA.2","Valve Cell, Mesen.",0.0267447109244869
+"B6.M.Endo.RNA.3","Valve Cell, Mesen.",0.0332077615001897
+"CM_Sham_19","Valve Cell, Mesen.",0.00125215336994804
+"CM_Sham_20","Valve Cell, Mesen.",0.000584606698134504
+"CM_Sham_21","Valve Cell, Mesen.",0.00120297392637713
+"FB_Sham_10","Valve Cell, Mesen.",0.0171612133484447
+"FB_Sham_11","Valve Cell, Mesen.",0.00175699313649746
+"FB_Sham_12","Valve Cell, Mesen.",0.00351445684276872
+"EC_Sham_1","Valve Cell, Mesen.",0.107041842942338
+"EC_Sham_2","Valve Cell, Mesen.",0.0741977101358545
+"EC_Sham_3","Valve Cell, Mesen.",0.0707938429665816
+"1","Monocyte, Myeloid",0.0590254260060947
+"10","Monocyte, Myeloid",0.0133309616884611
+"11","Monocyte, Myeloid",0.0370133987162161
+"12","Monocyte, Myeloid",0.0282421792588581
+"13","Monocyte, Myeloid",0.0135278544110044
+"14","Monocyte, Myeloid",0.0757355289620229
+"15","Monocyte, Myeloid",0.01482177370295
+"16","Monocyte, Myeloid",0.0370777415887151
+"17","Monocyte, Myeloid",0.0300681395777902
+"18","Monocyte, Myeloid",0.0190968377019122
+"19","Monocyte, Myeloid",0.0135776510583846
+"2","Monocyte, Myeloid",0.0206994663097975
+"20","Monocyte, Myeloid",0.0799517466449157
+"21","Monocyte, Myeloid",0.0329393569706325
+"22","Monocyte, Myeloid",0.0165014221600634
+"23","Monocyte, Myeloid",0.045963632463401
+"24","Monocyte, Myeloid",0.0157890113421373
+"25","Monocyte, Myeloid",0.0477435390813636
+"26","Monocyte, Myeloid",0.032658751529573
+"27","Monocyte, Myeloid",0.0223169354427099
+"28","Monocyte, Myeloid",0.10381699872183
+"29","Monocyte, Myeloid",0.036958563828845
+"3","Monocyte, Myeloid",0.0123640908926319
+"30","Monocyte, Myeloid",0.0189997197621267
+"31","Monocyte, Myeloid",0.0538909835746633
+"32","Monocyte, Myeloid",0.0242829595322222
+"33","Monocyte, Myeloid",0.0342127539172805
+"34","Monocyte, Myeloid",0.0170015365041523
+"35","Monocyte, Myeloid",0.0344222919564923
+"36","Monocyte, Myeloid",0.0537349984698386
+"37","Monocyte, Myeloid",0.0157086910622516
+"38","Monocyte, Myeloid",0.0193209850989223
+"39","Monocyte, Myeloid",0.0246048828017491
+"4","Monocyte, Myeloid",0.0780794763589633
+"40","Monocyte, Myeloid",0.0272495065441032
+"41","Monocyte, Myeloid",0.0247215833666273
+"42","Monocyte, Myeloid",0.0434802362953162
+"43","Monocyte, Myeloid",0.0153109577103589
+"44","Monocyte, Myeloid",0.0751181022687399
+"5","Monocyte, Myeloid",0.0272177319435357
+"6","Monocyte, Myeloid",0.0167566284953348
+"7","Monocyte, Myeloid",0.0412365977647758
+"8","Monocyte, Myeloid",0.0410142288511161
+"9","Monocyte, Myeloid",0.0318986926430947
+"B6.F.CM.RNA.1","Monocyte, Myeloid",0.010982552541748
+"B6.F.CM.RNA.2","Monocyte, Myeloid",0.0142741412073974
+"B6.F.CM.RNA.3","Monocyte, Myeloid",0.0213072971785102
+"B6.F.CM.RNA.4","Monocyte, Myeloid",0.034123771672193
+"B6.F.CM.RNA.5","Monocyte, Myeloid",0.015374296062393
+"B6.F.Fib.RNA.1","Monocyte, Myeloid",0.0188553852484531
+"B6.F.Fib.RNA.3","Monocyte, Myeloid",0.0197319205007991
+"B6.F.Fib.RNA.4","Monocyte, Myeloid",0.0272026182210206
+"B6.F.Fib.RNA.5","Monocyte, Myeloid",0.0212645286061613
+"B6.M.CM.RNA.1","Monocyte, Myeloid",0.0517271841105093
+"B6.M.CM.RNA.3","Monocyte, Myeloid",0.0202448574690431
+"B6.M.CM.RNA.4","Monocyte, Myeloid",0.0380123660209837
+"B6.M.CM.RNA.5","Monocyte, Myeloid",0.013248409863549
+"B6.M.Fib.RNA.2","Monocyte, Myeloid",0.0244429963801984
+"B6.M.Fib.RNA.3","Monocyte, Myeloid",0.0321361171958937
+"B6.M.Endo.RNA.1","Monocyte, Myeloid",0.00977687837630676
+"B6.M.Endo.RNA.2","Monocyte, Myeloid",0.00116938817145407
+"B6.M.Endo.RNA.3","Monocyte, Myeloid",0.00804336584567728
+"CM_Sham_19","Monocyte, Myeloid",0
+"CM_Sham_20","Monocyte, Myeloid",0
+"CM_Sham_21","Monocyte, Myeloid",0
+"FB_Sham_10","Monocyte, Myeloid",0.20225765778601
+"FB_Sham_11","Monocyte, Myeloid",0.294224743338482
+"FB_Sham_12","Monocyte, Myeloid",0.307911316586902
+"EC_Sham_1","Monocyte, Myeloid",0
+"EC_Sham_2","Monocyte, Myeloid",0
+"EC_Sham_3","Monocyte, Myeloid",0
+"1","SMC, Mesenchymal",0
+"10","SMC, Mesenchymal",0.020658329799345
+"11","SMC, Mesenchymal",0.0336552927940251
+"12","SMC, Mesenchymal",0.00850864776245266
+"13","SMC, Mesenchymal",0.0593634063913087
+"14","SMC, Mesenchymal",0.0336216977241762
+"15","SMC, Mesenchymal",0.0668908996259045
+"16","SMC, Mesenchymal",0.0384295556497315
+"17","SMC, Mesenchymal",0
+"18","SMC, Mesenchymal",0.0358368736878856
+"19","SMC, Mesenchymal",0.0138336962263665
+"2","SMC, Mesenchymal",0.0161400467355616
+"20","SMC, Mesenchymal",0.0406568171529375
+"21","SMC, Mesenchymal",0.00204099806882522
+"22","SMC, Mesenchymal",0.0312301019917152
+"23","SMC, Mesenchymal",0.0468503643561079
+"24","SMC, Mesenchymal",0.00272764792417655
+"25","SMC, Mesenchymal",0
+"26","SMC, Mesenchymal",0.0195203760907291
+"27","SMC, Mesenchymal",0.0356228406791723
+"28","SMC, Mesenchymal",0
+"29","SMC, Mesenchymal",0
+"3","SMC, Mesenchymal",0
+"30","SMC, Mesenchymal",0.0258340808349811
+"31","SMC, Mesenchymal",0.101498908493947
+"32","SMC, Mesenchymal",0
+"33","SMC, Mesenchymal",0.0441788419479964
+"34","SMC, Mesenchymal",0.0454951835480063
+"35","SMC, Mesenchymal",0.000458870794829998
+"36","SMC, Mesenchymal",0
+"37","SMC, Mesenchymal",0
+"38","SMC, Mesenchymal",0.0148420939448028
+"39","SMC, Mesenchymal",0.0380867614694753
+"4","SMC, Mesenchymal",0.0265010927547021
+"40","SMC, Mesenchymal",0.0275353075760958
+"41","SMC, Mesenchymal",0.0187248139181329
+"42","SMC, Mesenchymal",0.112877642639945
+"43","SMC, Mesenchymal",0.0704903540769724
+"44","SMC, Mesenchymal",0.0051048770530192
+"5","SMC, Mesenchymal",0
+"6","SMC, Mesenchymal",0.077602659817109
+"7","SMC, Mesenchymal",0
+"8","SMC, Mesenchymal",0.0264607514928133
+"9","SMC, Mesenchymal",0.0230999494003392
+"B6.F.CM.RNA.1","SMC, Mesenchymal",0
+"B6.F.CM.RNA.2","SMC, Mesenchymal",0
+"B6.F.CM.RNA.3","SMC, Mesenchymal",0
+"B6.F.CM.RNA.4","SMC, Mesenchymal",0
+"B6.F.CM.RNA.5","SMC, Mesenchymal",0
+"B6.F.Fib.RNA.1","SMC, Mesenchymal",0.00202820264691392
+"B6.F.Fib.RNA.3","SMC, Mesenchymal",0.000558252026292966
+"B6.F.Fib.RNA.4","SMC, Mesenchymal",0.0605384148080802
+"B6.F.Fib.RNA.5","SMC, Mesenchymal",0.0527497102402737
+"B6.M.CM.RNA.1","SMC, Mesenchymal",0
+"B6.M.CM.RNA.3","SMC, Mesenchymal",0
+"B6.M.CM.RNA.4","SMC, Mesenchymal",0
+"B6.M.CM.RNA.5","SMC, Mesenchymal",0
+"B6.M.Fib.RNA.2","SMC, Mesenchymal",0.0428384627443276
+"B6.M.Fib.RNA.3","SMC, Mesenchymal",0
+"B6.M.Endo.RNA.1","SMC, Mesenchymal",3.10000300800236e-05
+"B6.M.Endo.RNA.2","SMC, Mesenchymal",0
+"B6.M.Endo.RNA.3","SMC, Mesenchymal",0
+"CM_Sham_19","SMC, Mesenchymal",0
+"CM_Sham_20","SMC, Mesenchymal",0.000753038219660622
+"CM_Sham_21","SMC, Mesenchymal",0.000177227639924574
+"FB_Sham_10","SMC, Mesenchymal",0.0265059086568966
+"FB_Sham_11","SMC, Mesenchymal",0.00786930917006385
+"FB_Sham_12","SMC, Mesenchymal",0.0247551561052607
+"EC_Sham_1","SMC, Mesenchymal",0.0615692009594137
+"EC_Sham_2","SMC, Mesenchymal",0.0908835452774717
+"EC_Sham_3","SMC, Mesenchymal",0.0594729935160148
+"1","Endothelial, Endocard.",0.00686390120619168
+"10","Endothelial, Endocard.",0
+"11","Endothelial, Endocard.",0.00351810573584315
+"12","Endothelial, Endocard.",0.00114426473032879
+"13","Endothelial, Endocard.",0
+"14","Endothelial, Endocard.",0
+"15","Endothelial, Endocard.",0
+"16","Endothelial, Endocard.",0.00142460580603957
+"17","Endothelial, Endocard.",0.00543115708559797
+"18","Endothelial, Endocard.",0.000611163766349803
+"19","Endothelial, Endocard.",0
+"2","Endothelial, Endocard.",0.0102928009459176
+"20","Endothelial, Endocard.",0
+"21","Endothelial, Endocard.",0.0278126246372453
+"22","Endothelial, Endocard.",0.00141031913215315
+"23","Endothelial, Endocard.",0
+"24","Endothelial, Endocard.",0
+"25","Endothelial, Endocard.",0.00667370384489403
+"26","Endothelial, Endocard.",0
+"27","Endothelial, Endocard.",0.00560969364070287
+"28","Endothelial, Endocard.",0
+"29","Endothelial, Endocard.",0
+"3","Endothelial, Endocard.",0.00185512261851512
+"30","Endothelial, Endocard.",0
+"31","Endothelial, Endocard.",0.000173487025923658
+"32","Endothelial, Endocard.",0.000583481023035089
+"33","Endothelial, Endocard.",0.013537551054649
+"34","Endothelial, Endocard.",0
+"35","Endothelial, Endocard.",0.0207755484288469
+"36","Endothelial, Endocard.",0.00442960745995773
+"37","Endothelial, Endocard.",0.00391758844510075
+"38","Endothelial, Endocard.",0.0247033621287119
+"39","Endothelial, Endocard.",0
+"4","Endothelial, Endocard.",0.00557951378769656
+"40","Endothelial, Endocard.",0
+"41","Endothelial, Endocard.",0.00747397554345621
+"42","Endothelial, Endocard.",0.00308972298771329
+"43","Endothelial, Endocard.",0.0082438886892125
+"44","Endothelial, Endocard.",0
+"5","Endothelial, Endocard.",0
+"6","Endothelial, Endocard.",0.0215977221747
+"7","Endothelial, Endocard.",0.00292805686888212
+"8","Endothelial, Endocard.",0.00194631459852758
+"9","Endothelial, Endocard.",0.00049814729365682
+"B6.F.CM.RNA.1","Endothelial, Endocard.",0.00115194028091904
+"B6.F.CM.RNA.2","Endothelial, Endocard.",0.00208777670709341
+"B6.F.CM.RNA.3","Endothelial, Endocard.",0.00937857728335235
+"B6.F.CM.RNA.4","Endothelial, Endocard.",0.0117583158002234
+"B6.F.CM.RNA.5","Endothelial, Endocard.",0
+"B6.F.Fib.RNA.1","Endothelial, Endocard.",0.154734173044723
+"B6.F.Fib.RNA.3","Endothelial, Endocard.",0.223020973185189
+"B6.F.Fib.RNA.4","Endothelial, Endocard.",0.0738020808106393
+"B6.F.Fib.RNA.5","Endothelial, Endocard.",0.211206510879798
+"B6.M.CM.RNA.1","Endothelial, Endocard.",0.00826552298778281
+"B6.M.CM.RNA.3","Endothelial, Endocard.",0.00225678322237291
+"B6.M.CM.RNA.4","Endothelial, Endocard.",0.0229265609669809
+"B6.M.CM.RNA.5","Endothelial, Endocard.",0.0069745301027999
+"B6.M.Fib.RNA.2","Endothelial, Endocard.",0.15009563928935
+"B6.M.Fib.RNA.3","Endothelial, Endocard.",0.23525865073357
+"B6.M.Endo.RNA.1","Endothelial, Endocard.",0.117986928723864
+"B6.M.Endo.RNA.2","Endothelial, Endocard.",0.0664320334351498
+"B6.M.Endo.RNA.3","Endothelial, Endocard.",0.0351627527113009
+"CM_Sham_19","Endothelial, Endocard.",0.00131810859138008
+"CM_Sham_20","Endothelial, Endocard.",0.000773768843049595
+"CM_Sham_21","Endothelial, Endocard.",0.00213364860799176
+"FB_Sham_10","Endothelial, Endocard.",0.0161513833528255
+"FB_Sham_11","Endothelial, Endocard.",0.0019086108143623
+"FB_Sham_12","Endothelial, Endocard.",0.00259348479330165
+"EC_Sham_1","Endothelial, Endocard.",0
+"EC_Sham_2","Endothelial, Endocard.",0
+"EC_Sham_3","Endothelial, Endocard.",0.00564658595550086
+"1","Cardiac Neuron",0
+"10","Cardiac Neuron",0.00371106687281441
+"11","Cardiac Neuron",0.00752777466033389
+"12","Cardiac Neuron",0.00246902923233307
+"13","Cardiac Neuron",0.0121165911915388
+"14","Cardiac Neuron",0.0126798598857352
+"15","Cardiac Neuron",0.0142543952354729
+"16","Cardiac Neuron",0.00617018599930674
+"17","Cardiac Neuron",0.00020699611184788
+"18","Cardiac Neuron",0.00292981365685583
+"19","Cardiac Neuron",0.00274559029967538
+"2","Cardiac Neuron",0.0106540810781455
+"20","Cardiac Neuron",0.0275853524509661
+"21","Cardiac Neuron",0
+"22","Cardiac Neuron",0.00780420266815698
+"23","Cardiac Neuron",0.0289455540181222
+"24","Cardiac Neuron",0.00670608310407846
+"25","Cardiac Neuron",0.0026040066771164
+"26","Cardiac Neuron",0.00650278767614353
+"27","Cardiac Neuron",0.00323455590713142
+"28","Cardiac Neuron",0
+"29","Cardiac Neuron",0.00616539874372208
+"3","Cardiac Neuron",0.000160557752415585
+"30","Cardiac Neuron",0.0043273566939313
+"31","Cardiac Neuron",0.018497162855252
+"32","Cardiac Neuron",0.0033459994647902
+"33","Cardiac Neuron",0.00870769567050983
+"34","Cardiac Neuron",0.00413915595039853
+"35","Cardiac Neuron",0.00907939343469605
+"36","Cardiac Neuron",0.00637796835904577
+"37","Cardiac Neuron",0.0031908370240957
+"38","Cardiac Neuron",0.000253255187347873
+"39","Cardiac Neuron",0.00488705328820352
+"4","Cardiac Neuron",0.0124790010978774
+"40","Cardiac Neuron",0.0150177690511529
+"41","Cardiac Neuron",0.00210004297426875
+"42","Cardiac Neuron",0.00632928473106536
+"43","Cardiac Neuron",0.0155346275384382
+"44","Cardiac Neuron",0
+"5","Cardiac Neuron",7.18426222754715e-06
+"6","Cardiac Neuron",0.0166032175025113
+"7","Cardiac Neuron",0.00543412140344591
+"8","Cardiac Neuron",0.00352044914694093
+"9","Cardiac Neuron",0.00972313326295825
+"B6.F.CM.RNA.1","Cardiac Neuron",0
+"B6.F.CM.RNA.2","Cardiac Neuron",0
+"B6.F.CM.RNA.3","Cardiac Neuron",0
+"B6.F.CM.RNA.4","Cardiac Neuron",0
+"B6.F.CM.RNA.5","Cardiac Neuron",0
+"B6.F.Fib.RNA.1","Cardiac Neuron",0.0770573996364655
+"B6.F.Fib.RNA.3","Cardiac Neuron",0.113092667019793
+"B6.F.Fib.RNA.4","Cardiac Neuron",0.0947340966109749
+"B6.F.Fib.RNA.5","Cardiac Neuron",0.108493983748753
+"B6.M.CM.RNA.1","Cardiac Neuron",0
+"B6.M.CM.RNA.3","Cardiac Neuron",0
+"B6.M.CM.RNA.4","Cardiac Neuron",0.00114393711598599
+"B6.M.CM.RNA.5","Cardiac Neuron",0
+"B6.M.Fib.RNA.2","Cardiac Neuron",0.100184376455082
+"B6.M.Fib.RNA.3","Cardiac Neuron",0.128120982287723
+"B6.M.Endo.RNA.1","Cardiac Neuron",0.0110264033458245
+"B6.M.Endo.RNA.2","Cardiac Neuron",0.00180433295251343
+"B6.M.Endo.RNA.3","Cardiac Neuron",0
+"CM_Sham_19","Cardiac Neuron",0.000468246060197957
+"CM_Sham_20","Cardiac Neuron",0.000127064093983081
+"CM_Sham_21","Cardiac Neuron",0
+"FB_Sham_10","Cardiac Neuron",0.0280310113685837
+"FB_Sham_11","Cardiac Neuron",0.0263928729705032
+"FB_Sham_12","Cardiac Neuron",0.0225707604139276
+"EC_Sham_1","Cardiac Neuron",0.0111926514626333
+"EC_Sham_2","Cardiac Neuron",0.00942910371272852
+"EC_Sham_3","Cardiac Neuron",0.0156958450120087
