@@ -24,7 +24,7 @@ rm(libs)
 ```
 
 ```{r load data}
-sn <- LoadH5Seurat("data/processed/single_cell/merges/rau_patterson/09132023/doublets_below_1_5.h5seurat")
+sn <- LoadH5Seurat("data/processed/single_cell/merges/rau_patterson/09132023/doublets_below_3.h5seurat")
 
 # Load bulk data
 bulk <- read.csv("data/processed/bulk/cc/06222022/counts_summed_transcripts.csv", row.names = 1)
@@ -72,34 +72,36 @@ bulk.all <- cbind(cpm, fractions)
 ```
 
 ```{r scran find markers, fig.width = 7, fig.height= 8, echo=FALSE, message=FALSE, warning=FALSE}
-# Update sn with annotations
-sn <- sn |>
-      subset(features = rownames(sn)[rownames(sn) %in% rownames(bulk.all)]) 
 
-sn.sce <- sn|> 
+# Update sn with annotations
+sn.mark <- sn |>
+      subset(idents = seq(0,6,1)) |> 
+      subset(features = rownames(sn)[rownames(sn) %in% rownames(bulk.all)])
+
+sn.sce <- sn.mark |> 
   as.SingleCellExperiment(assay = "RNA") |>
   as("SummarizedExperiment")
 
 # Add gene names
-rownames(sn.sce) <- rownames(sn@assays$RNA@counts)
+rownames(sn.sce) <- rownames(sn.mark@assays$RNA@counts)
 
 # Get markers based on expression ratios between clusters and 1vAll comparisons
 
-scn.markers  <- scran::findMarkers(sn.sce, groups = Idents(sn), pval.type = "all", direction = "up")
+scn.markers  <- scran::findMarkers(sn.sce, groups = Idents(sn.mark), pval.type = "all")
 
 
 .getMarkers <- function(type){
 marker <- scn.markers@listData[[type]] |>
   as.data.frame() |>
   arrange(p.value) |>
-  slice_head(n = 15) |>
+  slice_head(n = 25) |>
   dplyr::select(p.value, FDR, summary.logFC) |>
   mutate(celltype = type) |> 
   rownames_to_column(var = "gene")
 return(marker)}
 
 
-all.markers <- lapply(levels(Idents(sn))[1:6], function(x){.getMarkers(x)}) |>
+all.markers <- lapply(levels(Idents(sn.mark)), function(x){.getMarkers(x)}) |>
                purrr::reduce(full_join)
 
 all.markers |>
@@ -129,14 +131,14 @@ cell.types <- c("Endothelial, Cor. Art.",
                 "Valve Cell, Mesen.",
                 "Monocyte, Myeloid",
                 "SMC, Mesenchymal",
-                "Endothelial, Endocard.",
-                "Cardiac Neuron",
-                "unclear",#"?Matrix FB, Lung?"
-                "unclear",#"??EC, CA??"
-                "unclear")#"???")
+                "Endothelial, Endocard.")
+                #"Cardiac Neuron",
+                #"unclear",#"?Matrix FB, Lung?"
+                #"unclear",#"??EC, CA??"
+                #"unclear")#"???")
 
-names(cell.types) <- levels(sn)
-sn <- RenameIdents(sn, cell.types)
+names(cell.types) <- levels(sn.mark)
+sn.mark <- RenameIdents(sn.mark, cell.types)
 ```
 
 ```{r plot cell types}
@@ -163,7 +165,7 @@ dev.off()
 
 ```
 ```{r save data }
-#SaveH5Seurat(sn, "data/processed/single_cell/merges/rau_patterson/09132023/cell_types_db_1_5")
+#SaveH5Seurat(sn, "data/processed/single_cell/merges/rau_patterson/09132023/cell_types_db_3")
 ```
 
 
@@ -181,11 +183,11 @@ row.names(bulk.es.exp) <- all.markers$gene
 # Run MuSiC with subset genes
 
 # Convert to SingleCellExperiment
-sce <- as.SingleCellExperiment(sn, assay = "RNA")
+sce <- as.SingleCellExperiment(sn.mark, assay = "RNA")
   
 # Exclude specified clusters
-cells <- levels(Idents(sn))
-cells <- cells[!(cells %in% c("unclear", "Endothelial, Endocard.", "Cardiac Neuron")) & !is.na(cells)]
+cells <- levels(Idents(sn.mark))
+cells <- cells[!(cells %in% c("unclear")) & !is.na(cells)]
   
 # Use MuSiC to estimate cell type proportions
 decon <- music_prop(bulk.mtx = bulk.es.exp, sc.sce = sce, markers = all.markers$gene,
@@ -200,7 +202,8 @@ rm(decon)
 rm(sce)
 rm(cells)
 
-write.csv(decon.melt, "results/composition_est/06222022/rau_patterson/09132023.csv", row.names = F)
+write.csv(decon.melt, "results/composition_est/06222022/rau_patterson/09132023.csv", 
+          row.names = F)
 
 ```
 

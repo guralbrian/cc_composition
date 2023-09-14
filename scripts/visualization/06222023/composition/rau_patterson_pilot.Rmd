@@ -54,6 +54,7 @@ decon.frac <- decon.melt|>
 
 
 decon.melt <- decon.melt|> 
+              mutate(Sub = paste0("S", Sub)) |> 
               subset(Sub %in% phenos$Sub)
 # Unmelt for clustering 
 decon.wide <- decon.melt  |> 
@@ -95,7 +96,7 @@ decon.frac |>
 
 ```
 
-```{r comp plots, echo=FALSE, fig.width=16, fig.heigh = 5}
+```{r comp plots, echo=FALSE, fig.width=16, fig.height = 5}
 
 my_palette <- c('#78c679', '#d95f0e')
 
@@ -148,11 +149,7 @@ comp_celltype <- decon.melt  %>%
     labs(x = "Cell Type", 
          y = "Proportion", 
          fill = "Treatment") +
-    scale_fill_manual(values = my_palette) +
-    scale_x_discrete(
-      breaks = 1:length(levels(as.factor(decon.melt$CellType))),
-      label = levels(as.factor(decon.melt$CellType)))
-
+    scale_fill_manual(values = my_palette) 
 design <- "AABB"
 wrap_plots(A = comp_celltype, B = comp_sample, design = design)
 

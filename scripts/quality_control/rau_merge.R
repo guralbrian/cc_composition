@@ -24,7 +24,7 @@ rau.sn <- rau.sn |>
                    nFeature_RNA   < 2500    &
                    nCount_RNA     > 800     &
                    PercentMito   <= 5       & 
-                   DoubletScore   < 1.5)
+                   DoubletScore   < 3)
 
 # Normalize and dimensional reduction
 rau.sn <- rau.sn |>
@@ -60,7 +60,7 @@ rau.sn <- rau.sn |>
   RunUMAP(dims = 1:pcs, reduction = "harmony", verbose = F)
 
 # Save file
-SaveH5Seurat(rau.sn, "data/processed/single_cell/merges/rau_patterson/09132023/doublets_below_1_5")
+SaveH5Seurat(rau.sn, "data/processed/single_cell/merges/rau_patterson/09132023/doublets_below_3")
 
 # Make and save visuals
 p.clusters <- SCpubr::do_DimPlot(rau.sn,
@@ -114,7 +114,7 @@ design <- "EAB
            FCD"
 
 
-png(file = "data/processed/single_cell/merges/rau_patterson/09132023/cluster_features.png",
+png(file = "data/processed/single_cell/merges/rau_patterson/09132023/cluster_features_3.png",
     width = 1920, 
     height = 1080,
     units = "px")
