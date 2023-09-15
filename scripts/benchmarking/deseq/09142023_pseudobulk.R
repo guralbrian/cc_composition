@@ -1,15 +1,4 @@
----
-title: "PseudoBulk V2"
-author: "Brian Gural"
-date: "2023-08-07"
-output: html_document
----
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r load libs, message=FALSE, echo = F, warning=FALSE, results= 'hide', cache=FALSE, include=F}
 # List libraries
 libs <- c("Seurat", "ggplot2", "patchwork", "SeuratDisk","reshape2", "tidyverse",
           "SCpubr","shiny", "ggrepel", "gridExtra", "scCustomize", "httr", 
@@ -22,13 +11,9 @@ lapply(libs, require, character.only = T)
 
 rm(libs)
 
-```
-
-```{r load data, cache = TRUE, echo=FALSE, message=F, include = F}
 sn <- LoadH5Seurat("data/processed/single_cell/merges/rau_patterson/09132023/cell_types_db_1_5.h5seurat")
-```
 
-```{r make downsampled df}
+
 # Downsample 
 sn.small <- sn |>
   GetAssayData(assay = "RNA", slot = "counts") |>
@@ -52,18 +37,6 @@ new_levels <- gsub("[,\\. ]", "_", levels(Idents(sn.small)))
 # Update Idents with the new levels
 Idents(sn.small) <- factor(Idents(sn.small), levels = levels(Idents(sn.small)), labels = new_levels)
 
-# Verify the new levels
-levels(Idents(sn.small))
-
-```
-## R Markdown
-
-Having highly correlated variables in the design leads to unstable estimates of coefficients which will be reflected in large standard errors - Mike Love
-
-This Rmd is meant to test the effect of different representations of composition in DESeq2 models. I've made simulated bulk RNAseq datasets of from range of cell type proportions, using snRNAseq as a gene expression profile reference. The null hypothesis is that compositional differences will not result in false positives between samples. The alternative hypothesis is that there will be differences and the can be accounted for with covariates which represent the composition.
-
-
-```{r make pb functions, include = F}
 
 # Function to make a data frame of cell type ratios
 simulate_ratios <- function(major_cell, major_prop, 
@@ -144,18 +117,13 @@ AggCells <- function(sn, ratios, cell_count) {
 }
 
 
-```
-
-
-```{r make pb ratios}
-
 major.cell <- "Cardiomyocytes"
 major.prop <- 0.5
 cell.types <- unfactor(unique(Idents(sn.small)))
-range <- 0.20
+range <- 0.3
 step.size <- 0.01
 replicates <- 5
-noise <- 0.05
+noise <- 0.035
 
 ratios <- simulate_ratios(major_cell = major.cell, 
                                   major_prop = major.prop, 
@@ -165,9 +133,7 @@ ratios <- simulate_ratios(major_cell = major.cell,
                                   replicates = replicates,
                                   noise = noise)
 
-```
 
-```{r make additive pseudobulk}
 start <- Sys.time()
 # Function to make a list of cell type ratios
 cell.target <- 5000
@@ -177,10 +143,8 @@ pb.add <- sapply(1:nrow(ratios), function(x){AggCells(sn.small, ratios[x,-(lengt
 colnames(pb.add) <- rownames(ratios)
 
 end <- Sys.time() - start
-```
 
 
-```{r comp vars prep}
 # Make clr comp
 library(compositions)
 clr.sample <- clr(ratios[,as.character(cell.types)])
@@ -203,17 +167,12 @@ pca.sample$cm <- ratios[major.cell]
 ratios <- cbind(ratios, clr.sample) |> 
                  cbind(ilr.sample)  |> 
                  cbind(pca.sample) 
-```
 
-
-```{r make deseq2 df }
 # make df with clr, pca, and raw compositions
 counts <- pb.add
-total.genes <- 500
+total.genes <- 10
 counts.small <- counts[sample(rownames(counts), total.genes),]
-```
 
-```{r induced expression changes}
 
 # Randomly select 10% of genes to be differentially expressed
 n_genes <- nrow(counts.small)
@@ -235,9 +194,6 @@ for (col in colnames(counts.small)) {
   counts.small[diff_exp_genes, col] <- counts.small[diff_exp_genes, col] * fold_change
 }
 
-```
-
-```{r deseq2 model comparison improvement}
 
 models <- list(
   unadjusted    = ~ 0 + pct.change,
@@ -249,19 +205,12 @@ models <- list(
   clr_cm_fb     = ~ 0 + pct.change + clr.Cardiomyocytes + clr.Fibroblast__Mesen_,
   clr_cm_fb_im  = ~ 0 + pct.change + clr.Cardiomyocytes + clr.Fibroblast__Mesen_ + clr.Endothelial__Cor__Art_,
   clr_4         = ~ 0 + pct.change + clr.Cardiomyocytes + clr.Fibroblast__Mesen_ + clr.Endothelial__Cor__Art_ + clr.unclear,
-  ilr_1         = ~ 0 + pct.change + ilr.1,
-  ilr_2         = ~ 0 + pct.change + ilr.1 + ilr.2,
-  ilr_3         = ~ 0 + pct.change + ilr.1 + ilr.2 + ilr.3,
-  ilr_4         = ~ 0 + pct.change + ilr.1 + ilr.2 + ilr.3 + ilr.4,
-  ilr_5         = ~ 0 + pct.change + ilr.1 + ilr.2 + ilr.3 + ilr.4 + ilr.5,
   pc1           = ~ 0 + pct.change + PC1,
   pc2           = ~ 0 + pct.change + PC1 + PC2
   )
 
 
-```
 
-```{r old deseq function, include = F}
 # Change formatting so that DESeq doesn't complain
 sample_info <- ratios[colnames(counts),]
 colnames(sample_info) <- colnames(sample_info) |>
@@ -277,21 +226,21 @@ sample_info$pct.change <- relevel(sample_info$pct.change, ref = "0")
 
 # Function to run DESeq2
 TestModels <- function(model){
-# Create a DESeqDataSet
-dds <- DESeqDataSetFromMatrix(
-  countData = counts.small,
-  colData = sample_info,
-  design = model
-)
-
-# Run the DESeq 
-dds <- DESeq(dds)
-
-# Get the differential expression analysis results, contrasted against the 0 percent change group
-resultsNames(dds)
-genes <- lapply(pct.use, function(x)
-{results(dds, contrast = c("pct.change", "0", x)) |> as.data.frame()})
-return(genes)
+  # Create a DESeqDataSet
+  dds <- DESeqDataSetFromMatrix(
+    countData = counts.small,
+    colData = sample_info,
+    design = model
+  )
+  
+  # Run the DESeq 
+  dds <- DESeq(dds)
+  
+  # Get the differential expression analysis results, contrasted against the 0 percent change group
+  resultsNames(dds)
+  genes <- lapply(pct.use, function(x)
+  {results(dds, contrast = c("pct.change", "0", x)) |> as.data.frame()})
+  return(genes)
 }
 
 # Get the list of group percents to use
@@ -300,13 +249,9 @@ pct.use <- levels(sample_info$pct.change)[-1]
 # Run the analysis
 deseq.results <- lapply(models, function(x){TestModels(x)})  
 
-#save(deseq.res, file = "jensen/results/benchmarking/deseq/08112023_2000g")
-
-```
+save(deseq.res, file = "results/benchmarking/deseq/comp_adj/09152023_10g")
 
 
-
-```{r get deseq data, fig.width= 11, fig.height= 6}
 
 deseq.res <- deseq.results
 # Iterate over the names of de.lfcse
@@ -320,8 +265,6 @@ for (sublist_name in names(deseq.res)) {
   # Update the sublist in de.lfcse
   deseq.res[[sublist_name]] <- sublist
 }
-
-deseq.res.test <- map(deseq.res, ~ set_names(.x, pct.use))
 
 
 # Function to collect values from nested list DESeq output
@@ -337,7 +280,7 @@ calculate_stats <- function(data, column_name, threshold) {
       true_pos = map_dbl(values, ~sum(.x[[column_name]] < threshold & rownames(.x) %in% diff_exp_genes, na.rm = TRUE))
     ) %>%
     select(-values)
-
+  
   return(result)
 }
 
@@ -345,102 +288,22 @@ result <- calculate_stats(deseq.res, "padj", 0.05)
 
 # Replace the formatting change in the percent change group labels
 result$sub_sublist_name <- result$sub_sublist_name |>
-                     str_replace("_","-") |>
-                     as.numeric()
+  str_replace("_","-") |>
+  as.numeric()
 
 # Define the model types by adjustment used
 result <- result |> 
-      mutate(ModelType = factor(case_when(
-      str_detect(sublist_name, "unadjusted") ~ "No adjustment",
-      str_detect(sublist_name, "raw") ~ "Raw proportions",
-      str_detect(sublist_name, "clr") ~ "Centered log ratios",
-      str_detect(sublist_name, "ilr") ~ "Isometric log ratios",
-      str_detect(sublist_name, "pc") ~ "PCA")))
+  mutate(ModelType = factor(case_when(
+    str_detect(sublist_name, "unadjusted") ~ "No adjustment",
+    str_detect(sublist_name, "raw") ~ "Raw proportions",
+    str_detect(sublist_name, "clr") ~ "Centered log ratios",
+    str_detect(sublist_name, "ilr") ~ "Isometric log ratios",
+    str_detect(sublist_name, "pc") ~ "PCA")))
 
-```
-
-```{r plot DESeq output, fig.width=12, fig.height= 10, warning=F}
-
-pal <- c("#969696",
-         "#fcc5c0", "#fa9fb5", "#f768a1", "#c51b8a",
-         "#addd8e", "#78c679", "#31a354", "#006837",
-         "#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#08519c",
-         "#fd8d3c","#e6550d"
-         )
-
-# Modify legend text 
-
-models.legend <- list(
-  unadjusted    = ~ "Group",
-  raw_cm        = ~ "Group + CM prop",
-  raw_cm_fb     = ~ "Group + CM prop + 1x prop of minor cells",
-  raw_cm_fb_im  = ~ "Group + CM prop + 2x prop of minor cells",
-  raw_4         = ~ "Group + CM prop + 3x prop of minor cells",
-  clr_cm        = ~ "Group + CLR of CMs",
-  clr_cm_fb     = ~ "Group + CLR of CMs + 1x CLR of minor cells",
-  clr_cm_fb_im  = ~ "Group + CLR of CMs + 2x CLR of minor cells",
-  clr_4         = ~ "Group + CLR of CMs + 3x CLR of minor cells",
-  ilr_1         = ~ "Group + 1x ILR",
-  ilr_2         = ~ "Group + 2x ILR",
-  ilr_3         = ~ "Group + 3x ILR",
-  ilr_4         = ~ "Group + 4x ILR",
-  ilr_5         = ~ "Group + 5x ILR",
-  pc1           = ~ "Group + PC1",
-  pc2           = ~ "Group + PC1 + PC2"
-  )
-
-p.fp <- result |>
-ggplot(aes(x = sub_sublist_name, y = false_pos +0.01, color = sublist_name)) +
-  geom_point(alpha = 0.4) + # smaller and more transparent points
-  geom_smooth(se = F, method = "loess", size = 1.5, alpha = 0.2, span = 0.3) +
-  #scale_y_continuous(trans = "log2") +
-  scale_color_manual(values = pal,
-                     name = "Model design",
-                     labels = models.legend,
-                     breaks = names(models.legend)) +
-  theme_minimal() +
-  theme(
-    legend.position = "none",
-    legend.title = element_blank(),
-    text = element_text(size = 12),
-    panel.grid.major = element_blank(), # remove major gridlines
-    panel.grid.minor = element_blank()  # remove minor gridlines
-  ) +
-  #geom_magnify(from = c(-0.07, 0.07,-3,30), to = c(-0.08,0.08, 380,600), 
-  #                 shape = "rect", shadow = F)  +
-  labs(y= "False Positives in 500 genes", x = "Simulated CM proportion difference") +
-  ggtitle("False positive rate in simulated dataset\n(25mil counts, mean major prop is 0.5, 5 replicates)")
-
-p.tp <- result |>
-ggplot(aes(x = sub_sublist_name, y = true_pos + 0.01, color = sublist_name, group = sublist_name)) +
-  geom_point(alpha = 0.2) + # smaller and more transparent points
-  geom_smooth(se = F, method = "loess", size = 1.5, alpha = 0.2, span = 0.3) +
-  #scale_y_continuous(trans = "log10") +
-  scale_color_manual(values = pal,
-                     name = "Model design",
-                     labels = models.legend,
-                     breaks = names(models.legend)) +
-  theme_minimal() +
-  theme(
-    legend.position = "none",
-    legend.title = element_blank(),
-    text = element_text(size = 12),
-    panel.grid.major = element_blank(), # remove major gridlines
-    panel.grid.minor = element_blank()  # remove minor gridlines
-  ) +
-  #geom_magnify(from = c(-0.07, 0.07,-3,30), to = c(-0.08,0.08, 380,600), 
-  #                 shape = "rect", shadow = F)  +
-  labs(y= "True Positives out of 100 DE genes", x = "Simulated CM proportion difference") +
-  ggtitle("True positive rate (2x fold change)")
-
-
-
-```
-```{r make fp rate ratio}
 
 # Want to take the ratio of the false postive rate over the true positive rate
 
- # This is an example, replace with the actual number
+# This is an example, replace with the actual number
 total_diff_exp_genes <- length(diff_exp_genes)
 
 rates.df <- result %>%
@@ -460,60 +323,9 @@ rates.df <- rates.df %>%
   group_by(Metric, sublist_name) %>%
   mutate(median_value = median(Value, na.rm = TRUE) ) %>% # 
   arrange(Metric, median_value)
- 
-
-```
-
-```{r plot fp metric, fig.width=18, fig.height= 10}
-
-p.stats <- ggplot(rates.df, aes(x = sublist_name, y = Value)) +
-  geom_boxplot(aes(fill = sublist_name)) +
-  scale_fill_manual(values = pal,
-                     name = "Model design",
-                     labels = models.legend,
-                     breaks = names(models.legend)) +
-  facet_wrap(~ Metric, scales = "free") +
-  theme_minimal() +
-  theme(
-    legend.position = "right",
-    strip.background = element_blank(),
-    strip.text.x = element_text(size = 12),
-    axis.text.x = element_text(size = 7, angle = 30)
-  ) +
-  labs(
-    title = "Performance Metrics by Model Type",
-    y = "Metric Value",
-    x = "Model and Sublist"
-  ) +
-  scale_x_discrete(limits = unique(rates.df$sublist_name))
-
-# Filter the data for F1 score
-result_f1 <- rates.df %>% 
-  filter(Metric == "F1 score")
-
-# Create the scatterplot
-p.f1 <- ggplot(result_f1, aes(x = abs(sub_sublist_name), y = mean_value)) +
-  geom_point(aes(color = sublist_name), size = 4, alpha = 0.2) +
-  geom_smooth(aes(color = sublist_name), se = F, method = "loess", size = 1.5, alpha = 0.3, span = 0.3) +
-  scale_color_manual(values = pal,
-                     name = "Model design",
-                     labels = models.legend,
-                     breaks = names(models.legend)) +
-  theme_minimal() +
-  labs(
-    title = "F1 Score by Absolute Percent Difference",
-    x = "Absolute Percent Difference",
-    y = "F1 Score"
-  )
 
 
-design <- c("AC
-             BC")
-wrap_plots(A = p.fp, B = p.tp, C = p.stats, design = design)
 
-```
-
-```{r gmb retreat fig, fig.width=12.95*1.4, fig.height= 5.75*1.4, warning=F}
 
 pal <- c("#969696",
          "#fcc5c0", "#fa9fb5", "#f768a1", "#c51b8a",
@@ -534,11 +346,11 @@ models.legend <- list(
   clr_4         = ~ "CLR of CMs + 3x",
   pc1           = ~ "PC1",
   pc2           = ~ "PC1 + PC2"
-  )
+)
 
 p.fp <- result |> 
-        subset(ModelType != "Isometric log ratios") |>
-ggplot(aes(x = sub_sublist_name, y = false_pos +0.01, color = sublist_name)) +
+  subset(ModelType != "Isometric log ratios") |>
+  ggplot(aes(x = sub_sublist_name, y = false_pos +0.01, color = sublist_name)) +
   geom_point(alpha = 0.4) + # smaller and more transparent points
   geom_smooth(se = F, method = "loess", size = 1.5, alpha = 0.2, span = 0.8) +
   #scale_y_continuous(trans = "log2") +
@@ -560,8 +372,8 @@ ggplot(aes(x = sub_sublist_name, y = false_pos +0.01, color = sublist_name)) +
   ggtitle("False Positive Rate")
 
 p.tp <- result |> 
-        subset(ModelType != "Isometric log ratios") |>
-ggplot(aes(x = sub_sublist_name, y = true_pos + 0.01, color = sublist_name, group = sublist_name)) +
+  subset(ModelType != "Isometric log ratios") |>
+  ggplot(aes(x = sub_sublist_name, y = true_pos + 0.01, color = sublist_name, group = sublist_name)) +
   geom_point(alpha = 0.2) + # smaller and more transparent points
   geom_smooth(se = F, method = "loess", size = 1.5, alpha = 0.2, span = 0.7) +
   #scale_y_continuous(trans = "log10") +
@@ -586,16 +398,16 @@ ggplot(aes(x = sub_sublist_name, y = true_pos + 0.01, color = sublist_name, grou
 
 
 p.stats <- rates.df |> 
-        subset(ModelType != "Isometric log ratios" &
-               Metric == "F1 score") |> 
+  subset(ModelType != "Isometric log ratios" &
+           Metric == "F1 score") |> 
   ggplot(aes(x = factor(sublist_name, level = names(models.legend)), 
              y = Value)) +
   geom_boxplot(aes(fill = sublist_name)) +
   geom_jitter(width = 0.1, height = 0, alpha = 0.3) +
   scale_fill_manual(values = pal,
-                     name = "Model design",
-                     labels = models.legend,
-                     breaks = names(models.legend)) +
+                    name = "Model design",
+                    labels = models.legend,
+                    breaks = names(models.legend)) +
   theme_minimal() +
   theme(
     legend.position = "none",
@@ -607,10 +419,13 @@ p.stats <- rates.df |>
     y = "F1 Score (higher is more accurate)",
     x = "Model Type"
   ) 
+png(filename="results/benchmarking/deseq/comp_adj/09152023_10g",
+    width = 1920,
+    height = 1080,
+    units = "px")
 
 design <- c("ABC")
 wrap_plots(A = p.fp, B = p.tp, C = p.stats, design = design)
 
+dev.off()
 
-```
-```
