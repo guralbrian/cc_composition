@@ -1,11 +1,8 @@
 
 # List libraries
 libs <- c("Seurat", "ggplot2", "patchwork", "SeuratDisk","reshape2", "tidyverse",
-          "SCpubr","shiny", "ggrepel", "gridExtra", "scCustomize", "httr", 
-          "scales", "dplyr", "DeconvoBuddies", "readr", "SingleCellExperiment",
-          "SummarizedExperiment", "Biobase", "ggmagnify", "stringr", "MuSiC",
-          "ggforce", "DirichletReg", "readxl", "viridis", "DESeq2", "rlist",
-          "purrr") # list libraries here
+          "gridExtra",  "readr", "Biobase", "ggmagnify", "stringr", 
+          "ggforce", "viridis", "DESeq2", "rlist", "purrr") # list libraries here
 # Require all of them
 lapply(libs, require, character.only = T)
 
@@ -160,8 +157,6 @@ pca.sample <- prcomp(t(ratios[,as.character(cell.types)]))$rotation |>
               as.data.frame()
 
 pca.sample$pct.change <- ratios$pct.change
-pca.sample$fb <- ratios[changing.cell]
-pca.sample$cm <- ratios[major.cell]
 
 # add this info back to proportion dfs 
 ratios <- cbind(ratios, clr.sample) |> 
@@ -170,7 +165,7 @@ ratios <- cbind(ratios, clr.sample) |>
 
 # make df with clr, pca, and raw compositions
 counts <- pb.add
-total.genes <- 10
+total.genes <- 10000
 counts.small <- counts[sample(rownames(counts), total.genes),]
 
 
@@ -249,7 +244,7 @@ pct.use <- levels(sample_info$pct.change)[-1]
 # Run the analysis
 deseq.results <- lapply(models, function(x){TestModels(x)})  
 
-save(deseq.res, file = "results/benchmarking/deseq/comp_adj/09152023_10g")
+save(deseq.results, file = "results/benchmarking/deseq/comp_adj/09152023_10000g.Rdata")
 
 
 
@@ -287,7 +282,7 @@ calculate_stats <- function(data, column_name, threshold) {
 result <- calculate_stats(deseq.res, "padj", 0.05)
 
 # Replace the formatting change in the percent change group labels
-result$sub_sublist_name <- result$sub_sublist_name |>
+result$sub_sublist_name <- result$sub_sublist_name |>cod 
   str_replace("_","-") |>
   as.numeric()
 
@@ -368,7 +363,7 @@ p.fp <- result |>
   ) +
   #geom_magnify(from = c(-0.07, 0.07,-3,30), to = c(-0.08,0.08, 380,600), 
   #                 shape = "rect", shadow = F)  +
-  labs(y= "False Positives in 500 genes", x = "Simulated CM proportion difference") +
+  labs(y= "False Positives in 10,000 genes", x = "Simulated CM proportion difference") +
   ggtitle("False Positive Rate")
 
 p.tp <- result |> 
@@ -393,7 +388,7 @@ p.tp <- result |>
   ) +
   #geom_magnify(from = c(-0.07, 0.07,-3,30), to = c(-0.08,0.08, 380,600), 
   #                 shape = "rect", shadow = F)  +
-  labs(y= "True Positives out of 100 DE genes", x = "Simulated CM proportion difference") +
+  labs(y= "True Positives out of 2000 DE genes", x = "Simulated CM proportion difference") +
   ggtitle("True Positive Rate") 
 
 
@@ -419,7 +414,7 @@ p.stats <- rates.df |>
     y = "F1 Score (higher is more accurate)",
     x = "Model Type"
   ) 
-png(filename="results/benchmarking/deseq/comp_adj/09152023_10g",
+png(filename="results/benchmarking/deseq/comp_adj/09152023_10000g.png",
     width = 1920,
     height = 1080,
     units = "px")

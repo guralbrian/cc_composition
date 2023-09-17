@@ -52,5 +52,9 @@ rsconnect/
 data/
 
 # libraries folder 
-
 tools/r_libs/common/
+
+# data files
+
+*.csv
+*.Rdata

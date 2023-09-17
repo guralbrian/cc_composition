@@ -1,9 +1,11 @@
 #!/bin/bash
 #SBATCH -p general
 #SBATCH -N 1
-#SBATCH -t 24:00:00
+#SBATCH -t 48:00:00
 #SBATCH --mem=8g
 #SBATCH -n 1
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=bgural@email.unc.edu
 
 module load r r/4.2.1
 
