@@ -58,3 +58,7 @@ tools/r_libs/common/
 
 *.csv
 *.Rdata
+
+# no slurm logs 
+
+*.out
