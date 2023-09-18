@@ -69,9 +69,9 @@ simulate_ratios <- function(major_cell, major_prop,
   props$pct.change <- as.factor(rep(major_props_groups - major_prop, each = replicates))
   props$pct.change <- relevel(props$pct.change, ref = "0")
   rownames(props) <- paste0("mix_", 1:nrow(props))
-  props[,2] <- (props[,1] + rowMeans(props[,3:length(cell.types)])) / 3
-  props[,3] <- (props[,1] + rowMeans(props[,c(2,4:length(cell.types))])) / 4
-  props[,2:length(cell.types)] <- sapply(2:length(cell.types), function(x){props[,x] * sample(rnorm(1000, 1, noise), length(major_props))})
+  props[,2] <- (props[,1] + rowMeans(props[,3:length(cell_types)])) / 4
+  props[,3] <- (props[,1] + rowMeans(props[,4:length(cell_types)])) / 5
+  props[,2:length(cell_types)] <- sapply(2:length(cell_types), function(x){props[,x] * sample(rnorm(1000, 1, noise), length(major_props))})
   
   # Normalize back to proportional sum == 1
   props[,1:length(cell_types)]  <- props[,1:length(cell_types)]/rowSums(props[,1:length(cell_types)])
@@ -117,12 +117,12 @@ AggCells <- function(sn, ratios, cell_count) {
 
 
 major.cell <- "Cardiomyocytes"
-major.prop <- 0.5
+major.prop <- 0.7
 cell.types <- unfactor(unique(Idents(sn.small)))
-range <- 0.3
+range <- 0.2
 step.size <- 0.01
-replicates <- 4
-noise <- 0.03
+replicates <- 5
+noise <- 0.01
 
 ratios <- simulate_ratios(major_cell = major.cell, 
                           major_prop = major.prop, 

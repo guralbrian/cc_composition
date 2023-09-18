@@ -172,7 +172,7 @@ wrap_plots(A = p.fp, B = p.tp, C = p.stats, design = design)
 
 ```
 
-```{r gmb retreat fig, fig.width=12.95*1.4, fig.height= 14, warning=F}
+```{r gmb retreat fig, fig.width=15.69, fig.height= 10, warning=F}
 
 pal <- c("#969696",
          "#fcc5c0", "#fa9fb5", "#f768a1", "#c51b8a",
@@ -196,7 +196,8 @@ models.legend <- list(
   )
 
 p.fp <- result |> 
-        subset(ModelType != "Isometric log ratios") |>
+        subset(ModelType != "Isometric log ratios" &
+               sublist_name != "clr_4" & sublist_name != "raw_4") |>
 ggplot(aes(x = sub_sublist_name, y = false_pos +0.01, color = sublist_name)) +
   geom_point(alpha = 0.1) + # smaller and more transparent points
   geom_smooth(se = F, method = "loess", size = 1.5, alpha = 0.2, span = 0.8) +
@@ -211,15 +212,18 @@ ggplot(aes(x = sub_sublist_name, y = false_pos +0.01, color = sublist_name)) +
     legend.title = element_blank(),
     text = element_text(size = 24),
     panel.grid.major = element_blank(), # remove major gridlines
-    panel.grid.minor = element_blank()  # remove minor gridlines
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.y = element_text(size = 25)
   ) +
   #geom_magnify(from = c(-0.07, 0.07,-3,30), to = c(-0.08,0.08, 380,600), 
   #                 shape = "rect", shadow = F)  +
-  labs(y= "False Positives in 500 genes", x = "Simulated CM proportion difference") +
-  ggtitle("False Positive Rate")
+  labs(y= "False Positives", x = "Simulated CM proportion difference") 
 
 p.tp <- result |> 
-        subset(ModelType != "Isometric log ratios") |>
+        subset(ModelType != "Isometric log ratios" &
+               sublist_name != "clr_4" & sublist_name != "raw_4") |>
 ggplot(aes(x = sub_sublist_name, y = true_pos + 0.01, color = sublist_name, group = sublist_name)) +
   geom_point(alpha = 0.1) + # smaller and more transparent points
   geom_smooth(se = F, method = "loess", size = 1.5, alpha = 0.2, span = 0.7) +
@@ -236,62 +240,43 @@ ggplot(aes(x = sub_sublist_name, y = true_pos + 0.01, color = sublist_name, grou
     panel.grid.major = element_blank(), # remove major gridlines
     panel.grid.minor = element_blank(),
     legend.key.width = unit(3,"cm"),
-    legend.key.height =unit(1,"cm"), # remove minor gridlines
+    legend.key.height =unit(1,"cm"),
+    axis.title.y = element_text(size = 25)
   ) +
-  #geom_magnify(from = c(-0.07, 0.07,-3,30), to = c(-0.08,0.08, 380,600), 
-  #                 shape = "rect", shadow = F)  +
-  labs(y= "True Positives out of 100 DE genes", x = "Simulated CM proportion difference") +
-  ggtitle("True Positive Rate") 
-
-# Modify the ggplot for False Positives (p.fp) to include dodging by 'distance_bin'
-p.fp.bin <- result |> 
-  subset(ModelType != "Isometric log ratios") |>
-  ggplot(aes(x = sub_sublist_name, y = false_pos + 0.01, color = sublist_name)) +
-  geom_point(aes(dodge = distance_bin), position = position_dodge(0.2), alpha = 0.1) + # dodging
-  geom_smooth(se = F, method = "loess", size = 1.5, alpha = 0.2, span = 0.8) +
-  scale_color_manual(values = pal,
-                     name = "Model design",
-                     labels = models.legend,
-                     breaks = names(models.legend)) +
-  theme_minimal() +
-  theme(
-    legend.position = "none",
-    text = element_text(size = 24),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  ) +
-  labs(y= "False Positives in 500 genes", x = "Simulated CM proportion difference") +
-  ggtitle("False Positive Rate")
+  labs(y= "True Positives", x = "Proportion difference") 
 
 
 p.stats <- rates.df |> 
-        subset(ModelType != "Isometric log ratios" &
-               Metric == "F1 score") |> 
-  ggplot(aes(x = factor(sublist_name, level = names(models.legend)), 
-             y = Value)) +
-  geom_boxplot(aes(fill = sublist_name)) +
-  geom_jitter(width = 0.1, height = 0, alpha = 0.1) +
+        filter(ModelType != "Isometric log ratios" & Metric == "Recall" &
+               sublist_name != "clr_4" & sublist_name != "raw_4") |> 
+        group_by(sublist_name) |> 
+        arrange(median_value) |> 
+  ggplot(aes(y = factor(sublist_name), x = Value)) +
+  geom_boxplot(aes(fill = sublist_name), orientation = 'y', outlier.shape = NA) +
+  geom_jitter(width = 0, height = 0.1, alpha = 0.1, orientation = 'y') +
   scale_fill_manual(values = pal,
                      name = "Model design",
                      labels = models.legend,
                      breaks = names(models.legend)) +
-  #facet_wrap(~ distance_bin) +
   theme_minimal() +
   theme(
-    legend.position = "bottom",
-    axis.text.x = element_blank(),
-    text = element_text(size = 24)
+    legend.position = "right",
+    axis.text.y = element_blank(),
+    text = element_text(size = 24),
+    legend.text = element_text(size = 24),
+    legend.title = element_text(size = 25),
+    axis.title.y = element_text(size = 25)
   ) +
   labs(
-    title = "Model Accuracy",
-    y = "F1 Score (higher is more accurate)",
-    x = "Model Type"
-  ) 
+    x = "True positive rate",
+    y = "Model Type"
+  )
 
-design <- c("AB
-             CC")
+design <- c("AC
+             BC")
 wrap_plots(A = p.fp, B = p.tp, C = p.stats, design = design)
 
+# this was the GMB PLOT!
 
 ```
 
