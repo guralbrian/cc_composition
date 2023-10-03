@@ -1,0 +1,109 @@
+---
+title: "CC Power Analysis"
+author: "Brian Gural"
+date: "2023-10-03"
+output: html_document
+---
+
+```{r load libs}
+libs <- c("tidyverse", "Seurat", "SeuratDisk", "SCpubr", "Biobase",  
+          "reshape2", "ggmagnify", "compositions", "patchwork", "sparcc") # list libraries here
+lapply(libs, require, character.only = T)
+rm(libs)
+```
+
+
+```{r load data}
+# Define the URL the cached allele frequencies from SPARCC
+url <- "https://github.com/gkeele/sparcc_cache/archive/refs/heads/master.zip"
+
+# Load the RData file directly from the URL
+
+download.file(url = url, destfile = "data/raw/power_est/sparcc_cache.zip") 
+unzip("data/raw/power_est/sparcc_cache.zip",
+      exdir = "data/processed/power_est")
+
+```
+
+
+```{r load cc compositons}
+# Load composition estimates 
+# Produced by rau_celltyping.Rmd
+decon.melt <- read.csv("results/composition_est/06222022/rau_patterson/09132023.csv")
+
+# Load sample phenotypes
+phenos <- read.csv("data/raw/cc_counts/06222022/phenotypes/AdaptorList.csv")
+colnames(phenos)[2] <- "Sub"
+
+fractions.pheno <- read.csv("data/processed/bulk/cc/fractions/jensen_rau_froese_pheno", row.names = 1)
+
+colnames(fractions.pheno)[1] <- "Sub"
+
+```
+
+```{r est contr var}
+# Get the control subjects
+ctrl_subs <- phenos |> 
+            subset(Treatment == "Ctrl") |> 
+            pull(Sub)
+
+# Get CLR of proportions within each subject
+ctrl_clr <- decon.melt |> 
+            mutate(Sub = paste0("S", Sub)) |> 
+            subset(Sub %in% ctrl_subs) |> 
+            pivot_wider(names_from = "Sub", values_from = "Prop") |> 
+            column_to_rownames("CellType") %>%
+            mutate_all(as.numeric) |> 
+            t() |> 
+            compositions::clr() |> 
+            as.data.frame() |> 
+            rownames_to_column(var = "Sub") |> 
+            pivot_longer(cols = -Sub)
+
+colnames(ctrl_clr) <- c("Sub", "CellType", "Prop")
+
+# Get the variance within the cell types
+ctrl_clr <- ctrl_clr |> 
+  left_join(phenos, by = "Sub") |> 
+  group_by(CellType) |> 
+  mutate(cell_var = var(Prop))
+
+# Then make a linear mixed-effects model for each cell type
+var_celltype <- lapply(unique(ctrl_clr$CellType), function(x){
+  data <- ctrl_clr |> 
+    subset(CellType == x)
+    lm(Prop ~ as.factor(Sample.ID), data = data)
+}
+)
+# then get the variance components
+y <- summary(var_celltype[[1]])
+print(y$cov.unscaled)
+
+
+
+# Extract variance components
+var_components <- VarCorr(model)
+
+# Step 3: Calculate QTL effect size
+qtl_effect_size <- var_components$strain[1] / total_var
+
+
+
+```
+
+```{r power simulation, echo=FALSE}
+test <- sparcc::sim.CC.data(genomecache = "data/processed/power_est/sparcc_cache-master",
+                            num.lines = 2, num.replicates = 2, num.sim = 1, qtl.effect.size = 0.2)
+
+scans <- sparcc::run.sim.scans(test)
+perm.matrix <- sparcc::generate.perm.matrix(2, 3)
+perm.scans <- sparcc::run.perm.scans(perm.matrix = perm.matrix, sim.CC.scans = scans, sim.CC.object = test, use.progress.bar = T)
+thresholds <- sparcc::get.thresholds(thresh.scans = perm.scans)
+
+
+power <- sparcc::pull.power(scans)
+
+p
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

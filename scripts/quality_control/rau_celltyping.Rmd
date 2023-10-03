@@ -75,7 +75,7 @@ bulk.all <- cbind(cpm, fractions)
 
 # Update sn with annotations
 sn.mark <- sn |>
-      subset(idents = seq(0,6,1)) |> 
+      subset(idents = seq(0,4,1)) |> 
       subset(features = rownames(sn)[rownames(sn) %in% rownames(bulk.all)])
 
 sn.sce <- sn.mark |> 
@@ -93,14 +93,14 @@ scn.markers  <- scran::findMarkers(sn.sce, groups = Idents(sn.mark), pval.type =
 .getMarkers <- function(type){
 marker <- scn.markers@listData[[type]] |>
   as.data.frame() |>
-  arrange(p.value) |>
+  arrange(FDR) |>
   slice_head(n = 25) |>
   dplyr::select(p.value, FDR, summary.logFC) |>
   mutate(celltype = type) |> 
   rownames_to_column(var = "gene")
 return(marker)}
 
-
+# Collapse list of data frames
 all.markers <- lapply(levels(Idents(sn.mark)), function(x){.getMarkers(x)}) |>
                purrr::reduce(full_join)
 
@@ -129,9 +129,9 @@ cell.types <- c("Endothelial, Cor. Art.",
                 "Cardiomyocytes",
                 "Fibroblast, Mesen.",
                 "Valve Cell, Mesen.",
-                "Monocyte, Myeloid",
-                "SMC, Mesenchymal",
-                "Endothelial, Endocard.")
+                "Monocyte, Myeloid")
+                #"SMC, Mesenchymal",
+                #"Endothelial, Endocard.")
                 #"Cardiac Neuron",
                 #"unclear",#"?Matrix FB, Lung?"
                 #"unclear",#"??EC, CA??"
@@ -143,7 +143,7 @@ sn.mark <- RenameIdents(sn.mark, cell.types)
 
 ```{r plot cell types}
 # Make and save visuals
-p.clusters <- SCpubr::do_DimPlot(sn,
+p.clusters <- SCpubr::do_DimPlot(sn.mark,
                    label = T,
                    repel = T,
                    font.size = 14,
@@ -205,6 +205,11 @@ rm(cells)
 write.csv(decon.melt, "results/composition_est/06222022/rau_patterson/09132023.csv", 
           row.names = F)
 
+```
+
+```{r scdc prep}
+devtools::install_github("meichendong/SCDC")
+library("SCDC")
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
