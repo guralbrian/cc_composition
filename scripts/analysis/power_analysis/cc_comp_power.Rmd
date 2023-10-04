@@ -93,17 +93,91 @@ qtl_effect_size <- var_components$strain[1] / total_var
 
 ```{r power simulation, echo=FALSE}
 test <- sparcc::sim.CC.data(genomecache = "data/processed/power_est/sparcc_cache-master",
-                            num.lines = 2, num.replicates = 2, num.sim = 1, qtl.effect.size = 0.2)
+                            num.lines = 69, num.replicates = 12, num.sim = 10, qtl.effect.size = 0.1, strain.effect.size = 0.1)
 
 scans <- sparcc::run.sim.scans(test)
-perm.matrix <- sparcc::generate.perm.matrix(2, 3)
+perm.matrix <- sparcc::generate.perm.matrix(69, 5)
 perm.scans <- sparcc::run.perm.scans(perm.matrix = perm.matrix, sim.CC.scans = scans, sim.CC.object = test, use.progress.bar = T)
 thresholds <- sparcc::get.thresholds(thresh.scans = perm.scans)
 
 
-power <- sparcc::pull.power(scans)
+power <- sparcc::pull.power(scans, thresh = thresholds)
 
-p
+power
 ```
 
+
+```{r}
+#devtools::install_github("gkeele/sparcc")
+library(sparcc)
+
+
+#set number of replicates [1+], proportion of variance explained by strain effect [0-1], and number of functional alleles [2,3,8]
+#remember that assumptions about strain effect size influence power; higher h.strain = less benefit from replicates
+#error variance = 1 - h.strain - h.qtl
+num.replicates <- 12
+n.alleles <- 2
+qtl.effect.sizes <- unique(r1.dat$h.qtl)
+
+#interpolate power, display subset for number of strains [10-70 by 5, 72]
+power.at <- function(h2, n.alleles){
+  df <- sparcc::interpolate.table(sparcc::r1.dat, 
+                                  num.replicates=num.replicates,
+                                  strain.effect.size=h2,
+                                  n.alleles=n.alleles)
+  df[df$n.strains==65 & df$h.qtl %in% qtl.effect.sizes,]
+}
+power.table <- function(n.alleles){
+  tab <- data.frame(h.qtl=qtl.effect.sizes)
+  tab$strain.0 <- round(power.at(0, n.alleles)$power.window*100, 0) 
+  
+  strain.10 <- round(power.at(.1, n.alleles)$power.window*100, 0)
+  names(strain.10) <- unique(power.at(.1, n.alleles)$h.qtl)
+  tab$strain.10 <- NA
+  tab$strain.10[which(tab$h.qtl %in% names(strain.10))] <- strain.10
+  #tab$strain.10 <- round(power.at(.1, n.alleles)$power.window*100, 0)
+   
+  strain.25 <- round(power.at(.25, n.alleles)$power.window*100, 0)
+  names(strain.25) <- unique(power.at(.25, n.alleles)$h.qtl)
+  tab$strain.25 <- NA
+  tab$strain.25[which(tab$h.qtl %in% names(strain.25))] <- strain.25
+  #tab$strain.25 <- round(power.at(.25, n.alleles)$power.window*100, 0)
+  tab
+}
+power.range <- function(allele.rng=c(2,8)){
+  tablist <- list()
+  for (i in 1:length(allele.rng)) {
+    tablist[[i]] <- power.table(allele.rng[i])
+  }
+  tab <- tablist[[1]]
+  powten <- array(dim=c(length(allele.rng), nrow(tab), ncol(tab)-1))
+  for (i in 1:length(allele.rng)){
+    powten[i, , ] <- as.matrix(tablist[[i]][, -1])
+  }
+  for (h in 1:3){
+    tab[, h+1] <- as.character(tab[, h+1])
+    for (q in 1:nrow(tab)){
+      tab[q, h+1] <- paste0(paste(collapse="-", range(powten[, q, h])), "%")
+    }
+  }
+  tab
+  #paste(collapse=" - ", range(powten[, q, h]))
+  #powten
+}
+power.dat <- power.range(c(2,8))
+
+power.dat <- pivot_longer(power.dat, cols = -h.qtl)
+power.dat$value <- gsub("%", "", power.dat$value)
+power.dat$lower <- as.numeric(lapply(str_split(power.dat$value, "-"), "[[", 1))
+power.dat$upper <- as.numeric(lapply(str_split(power.dat$value, "-"), "[[", 2))
+```
+
+```{r plot power }
+
+power.dat |> 
+ggplot(aes(x = h.qtl)) +
+  geom_ribbon(aes(ymin=lower, ymax=upper, fill = name))
+
+
+```
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
