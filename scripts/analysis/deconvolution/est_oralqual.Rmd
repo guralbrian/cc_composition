@@ -1,0 +1,579 @@
+---
+title: "Annotating Rau-Patterson snRNAseq"
+author: "Brian Gural"
+date: "2023-09-13"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 10, message = F, warning = F, error = T)
+```
+
+
+
+```{r load libs}
+libs <- c("tidyverse", "Seurat", "SeuratDisk", "SCpubr", "Biobase", "MuSiC", 
+          "reshape2", "SingleCellExperiment") # list libraries here
+lapply(libs, require, character.only = T)
+rm(libs)
+```
+
+```{r load data}
+sn <- LoadH5Seurat("data/processed/single_cell/merges/rau_patterson/09132023/doublets_below_3.h5seurat")
+#sn <- LoadH5Seurat("data/processed/single_cell/merged_old.h5seurat")
+# Load bulk data
+bulk <- read.csv("data/processed/bulk/cc/06222022/counts_summed_transcripts.csv", row.names = 1)
+
+colnames(bulk) <- paste0("S", extract_numeric(colnames(bulk)))
+
+# Load sample phenotypes
+phenos <- read.csv("data/raw/cc_counts/06222022/phenotypes/AdaptorList.csv")
+colnames(phenos)[2] <- "Sub"
+
+
+#! this is the CPM adjusted data
+# Load fractions data
+fractions <- read.csv("data/processed/bulk/cc/fractions/jensen_rau_froese_cpm", row.names = 1)
+fractions.pheno <- read.csv("data/processed/bulk/cc/fractions/jensen_rau_froese_pheno", row.names = 1)
+frac.keep <- fractions.pheno |>   subset(origin != "Jensen") |>   pull(id)
+fractions <- fractions[,frac.keep]
+fractions.pheno <- fractions.pheno |> subset(origin != "Jensen")
+rm(frac.keep)
+
+colnames(fractions.pheno)[1] <- "Sub"
+#Load just Rau, raw counts
+#fractions <- read.csv("data/raw/rau_frac/celltype_counts.csv", row.names = 1)
+#fractions.pheno <- read.csv("data/raw/rau_frac/celltype_pheno.csv")
+```
+
+```{r merge bulks}
+common.genes <- row.names(fractions)[row.names(fractions) %in% row.names(bulk)]
+
+fractions <- fractions[common.genes,]
+fractions <- 2^fractions
+ 
+bulk <- bulk[common.genes,]
+
+ # Calculate the library size for each sample
+lib_sizes <- matrixStats::colSums2(as.matrix(bulk))
+cpm <- t(apply(bulk, 1, function(x) (x / lib_sizes) * 1e6)) 
+cpm <- cpm + 0.0000001
+
+
+# Calculate the library size for each sample
+
+
+bulk.all <- cbind(cpm, fractions)
+
+```
+
+```{r scran find markers, fig.width = 7, fig.height= 8, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Update sn with annotations
+sn.mark <- sn |>
+      #subset(idents = c(0,1,2,3,4,5)) |> 
+      subset(features = rownames(sn)[rownames(sn) %in% rownames(bulk.all)])
+
+sn.sce <- sn.mark |> 
+  as.SingleCellExperiment(assay = "RNA") |>
+  as("SummarizedExperiment")
+
+# Add gene names
+rownames(sn.sce) <- rownames(sn.mark@assays$RNA@counts)
+
+# Get markers based on expression ratios between clusters and 1vAll comparisons
+
+scn.markers  <- scran::findMarkers(sn.sce, groups = Idents(sn.mark), pval.type = "some", assay.type = "counts")
+
+
+.getMarkers <- function(type){
+marker <- scn.markers@listData[[type]] |>
+  as.data.frame() %>%
+  dplyr::filter(summary.logFC >= 1.5 |
+                   summary.logFC <= 0.5) |>
+  arrange(FDR) |>
+  slice_head(n = 10) |>
+  dplyr::select(p.value, FDR, summary.logFC) |>
+  mutate(celltype = type) |> 
+  rownames_to_column(var = "gene")
+return(marker)}
+
+# Collapse list of data frames
+all.markers <- lapply(levels(Idents(sn.mark)), function(x){.getMarkers(x)}) |>
+               purrr::reduce(full_join)
+
+all.markers |>
+  group_by(celltype) |>
+  arrange(desc(summary.logFC)) |>
+  slice_head(n = 3) 
+
+gc()
+```
+
+```{r print gene lists}
+
+# Genes here are printed and manuallly entered into ToppGene
+# https://toppgene.cchmc.org/
+genes <- function(x){ all.markers |> 
+                      subset(celltype == x) |> 
+                      pull(gene) |> 
+                      as.data.frame() |> 
+                      print(row.names = F, print.keys = F)
+}
+
+genes(0)
+
+cell.types <- c("Endothelial Cells",
+                "Cardiomyocytes",
+                "Fibroblast",
+                "VSMC/Pericytes",
+                "Monocytes/MF",
+                "SMC")
+                #"Cardiac Neuron",
+                #"?Matrix FB, Lung?")
+                #"unclear",#"??EC, CA??"
+                #"unclear")#"???")
+
+sn.mark <- sn |>
+ subset(idents = seq(0,length(cell.types)-1,1)) 
+ #subset(idents = c(0,1,2,4,5))
+names(cell.types) <- levels(sn.mark)
+sn.mark <- RenameIdents(sn.mark, cell.types)
+```
+
+```{r music}
+
+bulk.es.exp <- bulk.all[all.markers$gene,] |> 
+  sapply(as.integer) %>%
+  ExpressionSet(assayData = .) |> 
+  exprs()
+row.names(bulk.es.exp) <- all.markers$gene
+
+
+# Run MuSiC with subset genes
+
+# Convert to SingleCellExperiment
+sce <- as.SingleCellExperiment(sn.mark, assay = "RNA")
+  
+# Exclude specified clusters
+cells <- levels(Idents(sn.mark))
+cells <- cells[!(cells %in% c("unclear")) & !is.na(cells)]
+  
+# Use MuSiC to estimate cell type proportions
+decon <- music_prop(bulk.mtx = bulk.es.exp, sc.sce = sce, markers = all.markers$gene,
+                      clusters = "ident", samples = "orig.ident",
+                      select.ct = cells)
+  
+# Turn MuSiC output into graph-friendly dataframe
+decon.melt <- reshape2::melt(decon$Est.prop.weighted)
+colnames(decon.melt) = c('Sub', 'CellType', 'Prop')
+
+rm(decon)
+rm(sce)
+rm(cells)
+
+write.csv(decon.melt, "results/composition_est/06222022/rau_patterson/10142023.csv", 
+          row.names = F)
+
+```
+
+```{r reformat data}
+# Divide fraction and whole data
+#decon.melt$version <- "music" 
+#decon.melt <- rbind(decon.melt, props.bisque)
+decon.frac <- decon.melt|> 
+              subset(Sub %in% fractions.pheno$Sub) |> 
+              merge(fractions.pheno)
+
+
+decon.whole <- decon.melt|> 
+              #mutate(Sub = paste0("S", Sub)) |> 
+              subset(Sub %in% phenos$Sub)
+# Unmelt for clustering 
+decon.wide <- decon.whole  |> 
+              pivot_wider(names_from = "Sub", values_from = "Prop") |> 
+              column_to_rownames("CellType") %>%
+              mutate_all(as.numeric)
+
+# Add strain + treatment info
+decon.whole <- decon.whole |> 
+              left_join(phenos)
+
+# Reorder the factor levels of CellType so that they are ordered by sum of their values across groups
+decon.melt$CellType <- reorder(decon.melt$CellType, -decon.melt$Prop, FUN = sum)
+
+```
+
+```{r plot fractions, fig.width=14, fig.height = 6}
+decon.frac |>
+  ggplot(aes(x=Sub, y=Prop, fill=CellType))  +
+   geom_bar(stat='identity',
+           position = "fill",
+           width = 1,
+           color = "black")+
+  scale_fill_brewer(name = "Cell Type",
+                      palette = "Set2")  +
+   facet_wrap(~fraction,
+              scales = "free_x")+
+   ylab("Proportion") +
+   theme_minimal() +
+   theme(strip.text = element_text(size = 20),
+          title = element_text(size = 20),
+          axis.text.y  = element_text(size = 20),
+          legend.text = element_text(size = 18),
+          axis.ticks.x = element_blank(),
+          panel.grid = element_blank(),
+          legend.position = 'right',
+          legend.justification = 'left',
+          legend.margin = margin(t = -5, r = 0, b = 0, l = 0, unit = "pt"),
+          axis.text.x = element_blank(),
+          plot.margin = margin(0, 5, 1, 5),
+          plot.caption = element_text(size = 22, hjust = -0.3, face = "bold"),
+          plot.tag = element_text(size = 22, hjust = -0.3),
+          axis.title.y = element_text(size = 25)) +
+   xlab("Pure Cell Type Bulk RNAseq Replicates") 
+
+
+```
+
+```{r comp plots, echo=FALSE, fig.width=20, fig.height = 11}
+
+my_palette <- c('#78c679', '#d95f0e')
+legend.names <- c("Control", "Isoproternol Treated")
+
+ordered_df <- decon.whole %>%
+  filter(CellType == "Cardiomyocytes") %>%  # Filter rows where CellType is "Cardiomyocytes"
+  arrange(Prop) %>%  # Sort these rows by Prop in descending order
+  pull(Sub)  # Extract the Sub values in this order
+# Use the ordered Sub values to reorder the original data frame
+decon.whole <- decon.whole %>%
+  mutate(Sub = factor(Sub, levels = ordered_df)) %>%
+  arrange(Sub)
+decon.whole$CellType_wrap = str_wrap(decon.whole$CellType, width = 12)
+
+  
+# Use the ordered Sub values to reorder the original data frame
+decon.whole <- decon.whole %>%
+  mutate(Sub = factor(Sub, levels = ordered_df)) %>%
+  arrange(Sub)
+
+
+cell.type.order <-  decon.whole %>%
+  group_by(CellType_wrap) |> 
+  mutate(mean = mean(Prop)) |> 
+  arrange(desc(mean)) |>
+  pull(CellType_wrap) |> 
+  unique()
+
+design <- "AA
+           BB"
+
+# Generate boxplot
+comp_celltype <- decon.whole   %>%
+    ggplot(aes(x = factor(CellType_wrap, levels = as.character(cell.type.order)), y = Prop, fill = Treatment)) +
+    geom_boxplot(position = position_dodge(0.9), width = 0.9, color = "black") +
+    geom_jitter(inherit.aes = T, 
+                position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.9),
+                size = 2, alpha = 0.5) +
+    theme(axis.text.x = element_text(color = "black", size = 28, angle =0),
+          axis.text.y = element_text(color = "black", size = 28),
+          axis.ticks = element_blank(),
+          legend.position = c(0.8, 0.7),
+          legend.justification = c("right", "top"),
+          legend.box.just = "right",
+          legend.margin = margin(6, 6, 6, 6),
+          strip.text = element_text(size = 20),
+          title = element_text(size = 30),
+          legend.text = element_text(size = 32),
+          panel.background = element_rect(fill='transparent'),
+          plot.background = element_rect(fill='transparent', color=NA),
+          #panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.background = element_rect(fill='transparent'),
+          legend.box.background = element_rect(fill='transparent'),
+          axis.title.x = element_blank(),
+          plot.margin = unit(c(1,1,1,1), units = "cm"),
+          axis.title.y = element_text(size = 30)) +
+    labs(y = "Proportion", 
+         fill = "Treatment") +
+    scale_fill_manual(values = my_palette,
+                      labels = legend.names) 
+
+# Plot each sample in a barchart stacked by cell type
+comp_sample <- decon.whole  |>
+    subset(Prop > 0.01) |> 
+    ggplot(aes(x=Sub, y=Prop, fill=CellType_wrap))  +
+    geom_bar(stat='identity',
+           position = "fill",
+           width = 1,
+           color = "black")+
+    scale_fill_brewer(name = "Cell Type",
+                      palette = "Set2") +
+    theme_minimal() +
+    theme(strip.text = element_text(size = 20),
+          title = element_text(size = 20),
+          axis.text.y  = element_text(size = 20),
+          legend.text = element_text(size = 18),
+          axis.ticks.x = element_blank(),
+          panel.grid = element_blank(),
+          legend.position = 'right',
+          legend.justification = 'left',
+          legend.margin = margin(t = -5, r = 0, b = 0, l = 0, unit = "pt"),
+          axis.text.x = element_blank(),
+          plot.margin = margin(0, 5, 1, 5),
+          plot.caption = element_text(size = 22, hjust = -0.3, face = "bold"),
+          plot.tag = element_text(size = 22, hjust = -0.3),
+          axis.title.y = element_text(size = 25)) +
+    labs(y = "Proportion", 
+         x = "Samples") +
+    guides(fill = guide_legend(ncol = 1)) 
+  
+
+
+wrap_plots(A = comp_celltype, B = comp_sample, design = design)
+
+
+```
+
+```{r clr transform}
+# use clr or ilr to incorp the compositions into the design matrix
+comps.clr <- compositions::clr(t(decon.wide))
+
+colnames(comps.clr) <- paste0("clr.", colnames(comps.clr))
+```
+
+```{r pca transform}
+pca <- prcomp(decon.wide)
+```
+
+
+
+```{r deseq pre, fig.width = 12, fig.height= 6, echo=TRUE, message=TRUE, warning=FALSE}
+
+# Prepare for DESeq2
+count_data <- bulk[,-1]
+
+bulk <- mutate_all(bulk, function(x) round(as.numeric(as.character(x)), digits = 0)) # round to integers
+
+pheno.reorder <- phenos |> mutate(Sub = factor(Sub, levels = colnames(bulk))) |> arrange(Sub)
+# Prepare sample information
+sample_info <- data.frame(
+  row.names = colnames(bulk),
+  genotype = as.factor( pheno.reorder$Sample.ID),
+  treatment = as.factor(pheno.reorder$Treatment)
+)
+
+colnames(comps.clr)[1] <- "clr.Endothelial_Cells"
+colnames(comps.clr)[5] <- "clr.Immune"
+sample_info$treatment <- relevel(sample_info$treatment, ref = "Ctrl")
+
+```
+
+```{r deseq pca}
+
+sample.pca <- cbind(sample_info, pca$rotation)
+
+# Create a DESeqDataSet
+dds.pca <- DESeqDataSetFromMatrix(
+  countData = bulk,
+  colData = sample.pca,
+  design = ~ treatment + PC1 
+)
+
+# Run the DESeq pipeline
+dds.pca <- DESeq(dds.pca)
+
+# Run the differential expression analysis
+res.pca <- results(dds.pca, contrast = c("treatment", "Ctrl", "Iso"))
+```
+
+
+```{r deseq clr}
+library(DESeq2)
+sample.clr <- cbind(sample_info, comps.clr)
+
+
+# Create a DESeqDataSet
+dds.clr <- DESeqDataSetFromMatrix(
+  countData = bulk,
+  colData = sample.clr,
+  design = ~ treatment + genotype + clr.Endothelial_Cells
+)
+
+# Run the DESeq pipeline
+dds.clr <- DESeq(dds.clr)
+
+# Run the differential expression analysis
+res.clr <- results(dds.clr, contrast = c("treatment", "Ctrl", "Iso"))
+
+```
+
+```{r deseq raw}
+# Create a DESeqDataSet
+dds.raw <- DESeqDataSetFromMatrix(
+  countData = bulk,
+  colData = sample_info,
+  design = ~ treatment + genotype 
+)
+
+# Run the DESeq pipeline
+dds.raw <- DESeq(dds.raw)
+
+# Run the differential expression analysis
+res.raw <- results(dds.raw, contrast = c("treatment", "Ctrl", "Iso"))
+```
+
+```{r compare deseq pca, fig.width = 8, fig.height= 6, echo=TRUE, message=TRUE, warning=FALSE}
+# Compare results
+comparison.pca <- merge(as.data.frame(res.pca), as.data.frame(res.raw), by = "row.names", suffixes = c(".pca", ".raw"))
+
+# Calculate difference in -log10 p-values
+comparison.pca$p_diff <- -log10(comparison.pca$padj.pca) - -log10(comparison.pca$padj.raw)
+
+# Make categorical column
+comparison.pca <- comparison.pca |>
+        mutate(pca.sig = ifelse(padj.pca <= 0.05 & padj.raw >= 0.05, T, F),
+               raw.sig = ifelse(padj.pca >= 0.05 & padj.raw <= 0.05, T, F),
+               both.sig = ifelse(padj.pca <= 0.05 & padj.raw <= 0.05, T, F)) 
+
+# Get the gene names for the top 5 genes by change in adjusted p value, within lost and gained sig groups
+gained.pca <- comparison.pca |>  
+  subset(pca.sig == T) |>
+  arrange(desc(abs(p_diff))) |>
+  slice_head(n = 5)
+
+lost.pca <- comparison.pca |>  
+  subset(raw.sig == T) |> 
+  arrange(desc(abs(p_diff))) |>
+  slice_head(n = 5)
+
+top.pca <- comparison.pca |> 
+  arrange(padj.pca) |>
+  slice_head(n = 5)
+```
+
+```{r plot pca, fig.width = 16, fig.height= 9}
+library(ggrepel)
+
+limit <- comparison.pca |> 
+  na.omit() |>
+  arrange(desc(abs(p_diff))) |>
+  slice_head(n = 1) |>
+  pull(p_diff) * c(1, -1)
+
+plot.pca <- ggplot(comparison.pca, aes(x = log2FoldChange.pca, y = -log10(padj.pca), color = p_diff)) +
+  geom_point(alpha = 0.8, size = 4) +
+  scale_color_distiller(type = "div")+
+  #geom_text_repel(data = gained.pca, aes(label = Row.names), size = 8, box.padding = unit(0.35, "lines"), 
+  #                force = 40, segment.linetype = 2, segment.size = 0.6, color = "#d95f0e", force_pull = 0.01, min.segment.length = 0) + # label most increase sig genes 
+  geom_text_repel(data = lost.pca , aes(label = Row.names), size = 8, box.padding = unit(0.35, "lines"), 
+                  force = 20, segment.linetype = 2, segment.size = 0.6, color = "purple", force_pull = 0.01, min.segment.length = 0) + # label most decrease sig genes 
+  geom_text_repel(data = top.pca |>  subset(Row.names != "Sccpdh"), aes(label = Row.names), size = 8, box.padding = unit(0.35, "lines"), 
+                  force = 20, segment.linetype = 2, segment.size = 0.6, color = "black", force_pull = 0.01, min.segment.length = 0) + # label most sig genes 
+  theme_minimal() +
+  labs(x = "log2(Fold Change)", y = "-log10(adjusted p-value)", color = "Significance change after\naccounting for composition\n-log10(p-value)") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed") + 
+  geom_vline(xintercept = 0, linetype = "solid") + # add a line for p=0.05
+  theme(legend.position = c(0.17, 0.7),
+        axis.text.x = element_text(color = "black", size = 25),
+        axis.text.y = element_text(color = "black", size = 25),
+        axis.ticks = element_blank(),
+        title = element_text(size = 25),
+        legend.text = element_text(size = 25),
+        legend.key.size = unit(0.5, 'in'),
+        legend.title = element_text(vjust = 0.7),
+        axis.title.y = element_text(color = "black", size = 25),
+        axis.title.x = element_text(color = "black", size = 25),
+        panel.background = element_rect(fill='transparent'),
+        plot.background = element_rect(fill='transparent', color=NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.margin = unit(c(1,1,1,1), "cm")) +
+  ggtitle("Heart Failure DE w/ PCA-based composition in model")#, #subtitle = "Colored text show genes with greatest sig. gain")# move legend to the bottom
+
+plot.pca
+```
+
+
+
+```{r compare deseq clr, fig.width = 8, fig.height= 6, echo=TRUE, message=TRUE, warning=FALSE}
+# Compare results
+comparison.clr <- merge(as.data.frame(res.clr), as.data.frame(res.raw), by = "row.names", suffixes = c(".clr", ".raw"))
+
+# Calculate difference in -log10 p-values
+comparison.clr$p_diff <- -log10(comparison.clr$padj.clr) -  # low numbers mean that its not signficant when clr is used
+                         -log10(comparison.clr$padj.raw)    # large numbers mean that its significant w/o comp
+
+# Make categorical column
+comparison.clr <- comparison.clr |>
+        mutate(clr.sig = ifelse(padj.clr <= 0.05 & padj.raw >= 0.05, T, F),
+               raw.sig = ifelse(padj.clr >= 0.05 & padj.raw <= 0.05, T, F),
+               both.sig = ifelse(padj.clr <= 0.05 & padj.raw <= 0.05, T, F)) 
+
+# Get the gene names for the top 5 genes by change in adjusted p value, within lost and gained sig groups
+gained.clr <- comparison.clr |>  
+  subset(clr.sig == T) |>
+  arrange(desc(abs(p_diff))) |>
+  slice_head(n = 5)
+
+lost.clr <- comparison.clr |>  
+  subset(raw.sig == T) |> 
+  arrange(desc(abs(p_diff))) |>
+  slice_head(n = 5)
+
+top.clr <- comparison.clr |> 
+  arrange(padj.clr) |>
+  slice_head(n = 5)
+
+top.lost.raw <- comparison.clr |>
+  subset(raw.sig == T) |> 
+  arrange(padj.raw) |>
+  slice_head(n = 5)
+```
+
+```{r plot clr, fig.width = 16, fig.height= 9}
+library(ggrepel)
+library("wesanderson")
+pal <- wes_palette(name = "Zissou1", type = "continuous")
+limit <- comparison.clr |> 
+  na.omit() |>
+  arrange(desc(abs(p_diff))) |>
+  slice_head(n = 1) |>
+  pull(p_diff) * c(-1, 1)
+
+plot.clr <- ggplot(comparison.clr, aes(x = log2FoldChange.raw, y = -log10(padj.raw), color = p_diff)) +
+  geom_point(alpha = 1, size = 4) +
+  scale_color_distiller(type = "div", palette = "Spectral", limit = limit) +
+  geom_text_repel(data = gained.clr, aes(label = Row.names), size = 8, box.padding = unit(0.35, "lines"), 
+                  force = 40, segment.linetype = 2, segment.size = 0.6, color = "orange", force_pull = 0.01, min.segment.length = 0) + # label most increase sig genes 
+  geom_text_repel(data = lost.clr, aes(label = Row.names), size = 8, box.padding = unit(0.35, "lines"), 
+                  force = 20, segment.linetype = 2, segment.size = 0.6, color = "purple", force_pull = 0.01, min.segment.length = 0) + # label most decrease sig genes 
+  geom_text_repel(data = top.clr, aes(label = Row.names), size = 8, box.padding = unit(0.35, "lines"), 
+                  force = 20, segment.linetype = 2, segment.size = 0.6, color = "black", force_pull = 0.01, min.segment.length = 0) + # label most sig genes 
+  theme_minimal() +
+  labs(x = "log2(Fold Change)", y = "-log10(adjusted p-value)", color = "Change in -log10(p-value)") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed") + 
+  geom_vline(xintercept = 0, linetype = "solid") + # add a line for p=0.05
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(color = "black", size = 25),
+        axis.text.y = element_text(color = "black", size = 25),
+        axis.ticks = element_blank(),
+        title = element_text(size = 25),
+        legend.text = element_text(size = 25),
+        legend.key.size = unit(0.7, 'in'),
+        legend.title = element_text(vjust = 0.7),
+        axis.title.y = element_text(color = "black", size = 25),
+        axis.title.x = element_text(color = "black", size = 25),
+        panel.background = element_rect(color="black"),
+        plot.background = element_rect(color="black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  ggtitle("DE w/ clr-based composition in model", subtitle = "Colored text show genes that became or lost significance, top 5 by change")# move legend to the bottom
+
+plot.clr
+```
